@@ -1,0 +1,1055 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>공동주택 지하주차장 콘크리트 벽체 비구조내진설계(입력·배근·두께 검토 포함)</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --line:#d7e0ea;
+      --text:#1f2937;
+      --muted:#667085;
+      --accent:#1f4f8f;
+      --accent-soft:#edf4ff;
+      --ok:#10663a;
+      --warn:#9a5a00;
+      --bad:#b42318;
+      --ok-soft:#edf9f0;
+      --warn-soft:#fff6eb;
+      --bad-soft:#fff1f0;
+      --shadow:0 12px 28px rgba(16,24,40,0.06);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      line-height:1.55
+    }
+    .page{max-width:1480px;margin:0 auto;padding:24px}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
+    .title-wrap h1{margin:0 0 8px 0;font-size:30px;line-height:1.2}
+    .title-wrap .sub{color:var(--muted);font-size:14px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    button{
+      appearance:none;border:1px solid var(--line);background:#fff;border-radius:999px;
+      padding:10px 16px;font:inherit;cursor:pointer;color:var(--text)
+    }
+    button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .grid{display:grid;grid-template-columns:1.55fr 0.95fr;gap:20px;align-items:start}
+    .stack{display:grid;gap:18px}
+    .card{
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:20px
+    }
+    .card h2{margin:0 0 14px 0;font-size:20px;line-height:1.3}
+    .section-note{margin:0 0 10px 0;color:var(--muted);font-size:13px}
+    .input-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 16px}
+    .field{display:grid;gap:6px}
+    .field label{font-size:13px;font-weight:700;color:#344054}
+    .field input,.field select{
+      width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:12px;
+      font:inherit;background:#fff;color:var(--text)
+    }
+    .field input[readonly]{background:#dbe4ee;color:#0f172a;border-color:#98a6b8;font-weight:800}
+    .field input:disabled,.field select:disabled{background:#dbe4ee;color:#0f172a;border-color:#98a6b8;font-weight:800;opacity:1}
+    .checkline{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:#0f172a;font-weight:700}
+    .checkline input{margin-top:3px;width:18px;height:18px}
+    .small-help{font-size:12px;color:#475467;margin-top:6px}
+    .auto-chip{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#d6dee8;color:#0f172a;border:1px solid #95a4b7;font-size:11px;font-weight:900}
+
+    .field.wide{grid-column:span 3}
+    .field.two{grid-column:span 2}
+    .hint{
+      margin-top:12px;padding:12px 14px;border:1px solid #d8e7ff;background:var(--accent-soft);
+      border-radius:12px;color:#24436d;font-size:13px
+    }
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px 12px;border-bottom:1px solid #e6edf5;vertical-align:top}
+    th{text-align:left;font-size:13px;color:#344054;background:#f8fafc;font-weight:700}
+    td{font-size:14px}
+    .v{font-weight:900;color:#0f172a}
+    td.v{background:#e2e8f0}
+
+    .muted{color:var(--muted)}
+    .formula{
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+      background:#f8fafc;border:1px solid #e6edf5;border-radius:10px;padding:8px 10px;
+      white-space:normal;word-break:break-word;font-size:13px;line-height:1.55
+    }
+    .result-band{
+      margin-top:14px;border:1px solid #d5e4ff;background:linear-gradient(180deg,#f7fbff 0%,#eef5ff 100%);
+      border-radius:14px;padding:16px 18px
+    }
+    .result-band .headline{font-size:13px;font-weight:700;color:#37567e;margin-bottom:8px}
+    .result-band .big{font-size:24px;font-weight:900;line-height:1.2;margin-bottom:4px}
+    .result-band .desc{font-size:14px;color:#40566f}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;
+      border:1px solid #d8e7ff;background:#f6faff;font-size:12px;font-weight:800;color:#245b9f
+    }
+    .status{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900;border:1px solid transparent
+    }
+    .status.ok{background:var(--ok-soft);color:var(--ok);border-color:#b7e0c5}
+    .status.warn{background:var(--warn-soft);color:var(--warn);border-color:#f0d8b8}
+    .status.bad{background:var(--bad-soft);color:var(--bad);border-color:#f5c7c4}
+    .status.neutral{background:#f3f4f6;color:#344054;border-color:#e5e7eb}
+    .standard{display:grid;gap:14px}
+    .std-item{
+      border:1px solid #e6edf5;border-radius:14px;padding:14px 14px 12px 14px;background:#fbfdff
+    }
+    .std-item h3{margin:0 0 6px 0;font-size:15px}
+    .std-item p{margin:0;color:#475467;font-size:14px}
+    .assumption{
+      margin-top:14px;padding:14px;border-radius:14px;background:#fff8ee;border:1px solid #f0d8b8;
+      color:#7a5115;font-size:13px
+    }
+    .footer{margin-top:18px;font-size:12px;color:#667085}
+    .mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+    .tiny{font-size:12px}
+    .tag{display:inline-block;padding:2px 8px;border-radius:999px;background:#eef2f7;color:#344054;font-size:11px;font-weight:800}
+    .check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .check-card{
+      border:1px solid #e6edf5;border-radius:14px;padding:14px;background:#fbfdff
+    }
+    .check-card h3{margin:0 0 10px 0;font-size:16px}
+    .check-row{
+      display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed #e7eef7
+    }
+    .check-row:last-child{border-bottom:none}
+    .check-row .label{font-size:13px;color:#475467}
+    .check-row .value{font-size:13px;font-weight:800;text-align:right}
+    .mini-note{font-size:12px;color:#667085;margin-top:10px}
+    .inline-list{margin:8px 0 0 0;padding-left:18px}
+    .inline-list li{margin:4px 0}
+    @media (max-width:1200px){
+      .grid{grid-template-columns:1fr}
+      .header{flex-direction:column}
+    }
+    @media (max-width:900px){
+      .input-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .field.wide{grid-column:span 2}
+      .check-grid{grid-template-columns:1fr}
+    }
+    @media (max-width:700px){
+      .page{padding:16px}
+      .input-grid{grid-template-columns:1fr}
+      .field.wide,.field.two{grid-column:span 1}
+      .title-wrap h1{font-size:24px}
+      .result-band .big{font-size:20px}
+    }
+    @media print{
+      :root{--bg:#fff;--shadow:none}
+      body{background:#fff}
+      .page{max-width:none;padding:0}
+      .actions{display:none}
+      .card{box-shadow:none;break-inside:avoid}
+      button{display:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="title-wrap">
+        <h1>공동주택 지하주차장 콘크리트 벽체 비구조내진설계 HTML</h1>
+        <div class="sub">
+          지역·지반종류·위험도계수 입력 가능 / 지하 간략모드 시 z·h 자동 생략 /
+          국가지진위험지도 S 직접입력 + 80% 하한 반영 / 배근·벽두께 간이 적정성 검토 포함
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" onclick="window.print()">인쇄</button>
+        <button onclick="resetDefaults()">기본값 복원</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <main class="stack">
+        <section class="card">
+          <h2>1. 입력값</h2>
+          <p class="section-note">
+            비구조벽체 수평지진력은 KDS 41 17 00의 비구조요소 식으로 계산하고,
+            배근·두께 적정성은 콘크리트벽 최소 기준을 이용한 <strong>간이 판정</strong>으로 표시합니다.
+          </p>
+          
+          <div class="input-grid">
+            <div class="field">
+              <label for="region">지역</label>
+              <select id="region"></select>
+            </div>
+
+            <div class="field">
+              <label for="siteClass">지반종류</label>
+              <select id="siteClass"></select>
+            </div>
+
+            <div class="field">
+              <label for="hazard">위험도계수 I</label>
+              <input id="hazard" type="number" min="0.01" step="0.01" value="2.00" />
+            </div>
+
+            <div class="field">
+              <label for="sMethod">유효지반가속도 S 산정</label>
+              <select id="sMethod">
+                <option value="code" selected>기준식 S = Z × I</option>
+                <option value="map">국가지진위험지도 S 직접입력 + 80% 하한</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="sMapInput">국가지진위험지도 S 입력 (g)</label>
+              <input id="sMapInput" type="number" min="0" step="0.001" value="0.176" />
+            </div>
+
+            <div class="field">
+              <label for="wallType">벽체 분류 (표 18.3-1)</label>
+              <select id="wallType">
+                <option value="general">내부비구조벽체 및 칸막이벽 – 그밖의 벽과 칸막이</option>
+                <option value="cantilever">캔틸레버부재 – 파라펫 및 내부 캔틸레버 비구조벽체</option>
+              </select>
+            </div>
+
+            <div class="field wide">
+              <label>지하 간략모드</label>
+              <label class="checkline" for="undergroundMode">
+                <input id="undergroundMode" type="checkbox" checked />
+                <span>지하주차장 벽체의 개략 검토로 <strong>z = 0</strong>, 위치계수 <strong>(1 + 2z/h) = 1.0</strong>을 자동 적용</span>
+              </label>
+              <div class="small-help">엄밀 검토가 필요하면 체크를 해제하고 z, h를 직접 입력하십시오. 지하라고 해서 항상 z, h가 불필요한 것은 아닙니다.</div>
+            </div>
+
+            <div class="field">
+              <label for="ip">비구조요소 중요도계수 I<sub>p</sub></label>
+              <select id="ip">
+                <option value="1.0" selected>1.0 (일반)</option>
+                <option value="1.5">1.5 (피난·기능유지·위험물 관련)</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="zInput">부착 위치 높이 z (m)</label>
+              <input id="zInput" type="number" min="0" step="0.01" value="0.00" />
+            </div>
+
+            <div class="field">
+              <label for="hInput">지지구조 높이 h (m)</label>
+              <input id="hInput" type="number" min="0.01" step="0.01" value="7.00" />
+            </div>
+
+            <div class="field">
+              <label for="zh">높이비 z/h <span class="auto-chip">자동계산</span></label>
+              <input id="zh" type="text" value="0.000" readonly />
+            </div>
+
+            <div class="field">
+              <label for="thk">벽체 두께 t (mm)</label>
+              <input id="thk" type="number" min="1" step="1" value="200" />
+            </div>
+
+            <div class="field">
+              <label for="wallHeight">벽체 높이 H (m)</label>
+              <input id="wallHeight" type="number" min="0.01" step="0.01" value="7.00" />
+            </div>
+
+            <div class="field">
+              <label for="length">검토 길이 L (m)</label>
+              <input id="length" type="number" min="0.01" step="0.01" value="1.00" />
+            </div>
+
+            <div class="field">
+              <label for="gamma">콘크리트 단위중량 γ (kN/m³)</label>
+              <input id="gamma" type="number" min="0.1" step="0.1" value="24.0" />
+            </div>
+
+            <div class="field">
+              <label for="barDia">대표 분산철근 직경 D (mm)</label>
+              <input id="barDia" type="number" min="1" step="1" value="10" />
+            </div>
+
+            <div class="field">
+              <label for="barSpacing">대표 분산철근 간격 s (mm)</label>
+              <input id="barSpacing" type="number" min="1" step="1" value="200" />
+            </div>
+
+            <div class="field">
+              <label for="faces">배근면수</label>
+              <select id="faces">
+                <option value="2" selected>양면 복근</option>
+                <option value="1">단면 배근</option>
+              </select>
+            </div>
+
+            <div class="field wide">
+              <label>지반종류 설명 <span class="auto-chip">자동표시</span></label>
+              <input id="siteDesc" type="text" readonly />
+            </div>
+          </div>
+
+          <div class="hint">
+            <strong>입력 해석 주의</strong><br />
+            1) <strong>지하 간략모드</strong>는 사용자 편의를 위한 개략모드로 <strong>z = 0</strong>, 위치계수 <strong>1.0</strong>을 적용합니다. 정확 검토가 필요하면 모드를 해제하고 <strong>z</strong>, <strong>h</strong>를 직접 입력하십시오.<br />
+            2) <strong>유효지반가속도 80% 규정</strong>은 <strong>국가지진위험지도에서 S를 직접 입력할 때의 하한값</strong>입니다. 기준식 <strong>S = Z × I</strong>를 사용할 때는 다시 0.8을 곱하지 않습니다.<br />
+            3) 배근 검토는 입력한 <strong>직경·간격이 수직/수평 분산철근에 동일하게 적용된다고 가정</strong>합니다.<br />
+            4) <strong>S6 지반</strong>은 기준상 부지고유 특성평가 및 지반응답해석이 필요하므로, 본 HTML에서는 표준 Fa/Fv 기반 하중을 자동 산정하지 않습니다.
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>2. 적용 계수</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:33%">항목</th>
+                  <th style="width:17%">값</th>
+                  <th>설명</th>
+                </tr>
+              </thead>
+              
+              <tbody>
+                <tr>
+                  <td>지진구역</td>
+                  <td class="v" id="zoneCell"></td>
+                  <td id="zoneText"></td>
+                </tr>
+                <tr>
+                  <td>지진구역계수 Z</td>
+                  <td class="v" id="zCell"></td>
+                  <td>지역 선택에 따라 자동 반영</td>
+                </tr>
+                <tr>
+                  <td>위험도계수 I</td>
+                  <td class="v" id="hazardCell"></td>
+                  <td>사용자 입력값</td>
+                </tr>
+                <tr>
+                  <td>기준식 유효지반가속도 S<sub>0</sub> = Z × I</td>
+                  <td class="v" id="sCodeCell"></td>
+                  <td id="sCodeExplain"></td>
+                </tr>
+                <tr>
+                  <td>국가지진위험지도 입력값 S<sub>map</sub></td>
+                  <td class="v" id="sMapCell"></td>
+                  <td id="sMapExplain"></td>
+                </tr>
+                <tr>
+                  <td>80% 하한값 0.8 × S<sub>0</sub></td>
+                  <td class="v" id="sFloorCell"></td>
+                  <td id="sFloorExplain"></td>
+                </tr>
+                <tr>
+                  <td>적용 유효지반가속도 S</td>
+                  <td class="v" id="sCell"></td>
+                  <td id="sExplain"></td>
+                </tr>
+                <tr>
+                  <td>단주기 지반증폭계수 F<sub>a</sub></td>
+                  <td class="v" id="faCell"></td>
+                  <td id="faExplain"></td>
+                </tr>
+                <tr>
+                  <td>장주기 지반증폭계수 F<sub>v</sub></td>
+                  <td class="v" id="fvCell"></td>
+                  <td id="fvExplain"></td>
+                </tr>
+                <tr>
+                  <td>단주기 설계스펙트럼가속도 S<sub>DS</sub></td>
+                  <td class="v" id="sdsCell"></td>
+                  <td id="sdsExplain"></td>
+                </tr>
+                <tr>
+                  <td>비구조요소 중요도계수 I<sub>p</sub></td>
+                  <td class="v" id="ipCell"></td>
+                  <td>용도에 따라 1.0 또는 1.5</td>
+                </tr>
+                <tr>
+                  <td>증폭계수 a<sub>p</sub></td>
+                  <td class="v" id="apCell"></td>
+                  <td id="apExplain"></td>
+                </tr>
+                <tr>
+                  <td>반응수정계수 R<sub>p</sub></td>
+                  <td class="v" id="rpCell"></td>
+                  <td id="rpExplain"></td>
+                </tr>
+                <tr>
+                  <td>위치계수 (1 + 2z/h)</td>
+                  <td class="v" id="locCell"></td>
+                  <td id="locExplain"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>3. 산정식 및 하중 결과</h2>
+          <p class="section-note">결과는 입력한 <strong>검토 길이 L</strong> 기준 총하중과 환산하중입니다.</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:22%">항목</th>
+                  <th>산정식</th>
+                  <th style="width:19%">결과</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>벽체 체적 V</td>
+                  <td><div class="formula" id="vFormula"></div></td>
+                  <td class="v" id="vResult"></td>
+                </tr>
+                <tr>
+                  <td>비구조요소 중량 W<sub>p</sub></td>
+                  <td><div class="formula" id="wpFormula"></div></td>
+                  <td class="v" id="wpResult"></td>
+                </tr>
+                <tr>
+                  <td>선형중량 W<sub>p</sub>/L</td>
+                  <td><div class="formula" id="wlineFormula"></div></td>
+                  <td class="v" id="wlineResult"></td>
+                </tr>
+                <tr>
+                  <td>식 (18.2-1) F<sub>p,calc</sub></td>
+                  <td><div class="formula" id="fpEqFormula"></div></td>
+                  <td class="v" id="fpEqResult"></td>
+                </tr>
+                <tr>
+                  <td>식 (18.2-3) F<sub>p,min</sub></td>
+                  <td><div class="formula" id="fpMinFormula"></div></td>
+                  <td class="v" id="fpMinResult"></td>
+                </tr>
+                <tr>
+                  <td>식 (18.2-2) F<sub>p,max</sub></td>
+                  <td><div class="formula" id="fpMaxFormula"></div></td>
+                  <td class="v" id="fpMaxResult"></td>
+                </tr>
+                <tr>
+                  <td>적용 수평설계지진력 F<sub>p</sub></td>
+                  <td>
+                    <div class="formula" id="fpUseFormula"></div>
+                    <div style="margin-top:8px"><span class="pill" id="governTag"></span></div>
+                  </td>
+                  <td class="v" id="fpUseResult"></td>
+                </tr>
+                <tr>
+                  <td>등가 면외분포하중 q<sub>h</sub></td>
+                  <td><div class="formula" id="qhFormula"></div></td>
+                  <td class="v" id="qhResult"></td>
+                </tr>
+                <tr>
+                  <td>수직설계지진력 F<sub>pv</sub></td>
+                  <td><div class="formula" id="fpvFormula"></div></td>
+                  <td class="v" id="fpvResult"></td>
+                </tr>
+                <tr>
+                  <td>등가 수직분포하중 q<sub>v</sub></td>
+                  <td><div class="formula" id="qvFormula"></div></td>
+                  <td class="v" id="qvResult"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="result-band">
+            <div class="headline">최종 적용 하중 요약</div>
+            <div class="big" id="summaryMain"></div>
+            <div class="desc" id="summarySub"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>4. 배근 및 두께 간이 적정성 검토</h2>
+          <p class="section-note">
+            아래 검토는 <strong>건축물의 구조기준 등에 관한 규칙 제54조</strong>의 콘크리트벽 최소 요구를 이용한
+            <strong>간이 판정</strong>입니다. 비구조벽체 최종 구조설계, 접합부, 균열, 층간변위, 개구부, 슬래브 정착 검토를 대체하지 않습니다.
+          </p>
+
+          <div class="check-grid">
+            <div class="check-card">
+              <h3>배근 검토 <span id="rebarStatus" class="status neutral">검토중</span></h3>
+              <div class="check-row">
+                <div class="label">직경 기준</div>
+                <div class="value" id="rebarDiaCheck"></div>
+              </div>
+              <div class="check-row">
+                <div class="label">간격 기준</div>
+                <div class="value" id="rebarSpacingCheck"></div>
+              </div>
+              <div class="check-row">
+                <div class="label">양면 복근 요구</div>
+                <div class="value" id="rebarFaceCheck"></div>
+              </div>
+              <div class="check-row">
+                <div class="label">허용 최대 간격</div>
+                <div class="value" id="spacingLimit"></div>
+              </div>
+              <div class="check-row">
+                <div class="label">철근량(1면당)</div>
+                <div class="value" id="asOneFace"></div>
+              </div>
+              <div class="check-row">
+                <div class="label">철근량(총계)</div>
+                <div class="value" id="asTotal"></div>
+              </div>
+              <div class="mini-note" id="rebarNote"></div>
+            </div>
+
+            <div class="check-card">
+              <h3>벽체 두께 검토 <span id="thkStatus" class="status neutral">검토중</span></h3>
+              <div class="check-row">
+                <div class="label">입력 두께 t</div>
+                <div class="value" id="thkInputView"></div>
+              </div>
+              <div class="check-row">
+                <div class="label">규칙상 최소두께 t<sub>req</sub></div>
+                <div class="value" id="thkReq"></div>
+              </div>
+              <div class="check-row">
+                <div class="label">벽 높이 H/t</div>
+                <div class="value" id="slenderness"></div>
+              </div>
+              <div class="check-row">
+                <div class="label">판정</div>
+                <div class="value" id="thkCheckText"></div>
+              </div>
+              <div class="mini-note" id="thkNote"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="stack">
+        <section class="card">
+          <h2>건축구조기준 요약</h2>
+          <div class="standard">
+            <div class="std-item">
+              <h3>① 적용 기준</h3>
+              <p>
+                하중 산정은 <strong>KDS 17 10 00</strong>의 지진구역·지반분류 개념과
+                <strong>KDS 41 17 00</strong>의 비구조요소 식을 따릅니다.
+                배근·두께 적정성은 <strong>건축물의 구조기준 등에 관한 규칙 제54조</strong>를 이용한 간이 검토입니다.
+              </p>
+            </div>
+
+            <div class="std-item">
+              <h3>② 지진구역 / 위험도계수 / 유효지반가속도</h3>
+              <p>
+                지역에 따라 지진구역계수 <strong>Z</strong>가 달라지며, 기준식은 <span class="mono">S = Z × I</span>입니다.
+                또는 <strong>국가지진위험지도</strong>에서 <strong>S</strong>를 직접 입력할 수 있으며,
+                이때 적용값은 <span class="mono">S = max(S<sub>map</sub>, 0.8 × Z × I)</span>로 처리합니다.
+                대표 위험도계수는 500년 <strong>1.0</strong>, 1000년 <strong>1.4</strong>, 2400년 <strong>2.0</strong>입니다.
+              </p>
+            </div>
+
+            <div class="std-item">
+              <h3>③ 지반종류</h3>
+              <p>
+                지반은 <strong>S1~S6</strong>로 구분합니다. 본 HTML은 S1~S5는 표준 Fa/Fv 값을 사용하고,
+                <strong>S6</strong>는 부지고유 특성평가 및 지반응답해석이 필요한 지반으로 처리합니다.
+              </p>
+            </div>
+
+            <div class="std-item">
+              <h3>④ 비구조벽체 분류</h3>
+              <p id="wallTypeNote">
+                기본값은 표 18.3-1의 <strong>“내부비구조벽체 및 칸막이벽 – 그밖의 벽과 칸막이”</strong>이며,
+                <strong>a<sub>p</sub> = 1.0</strong>, <strong>R<sub>p</sub> = 2.5</strong>를 적용합니다.
+              </p>
+            </div>
+
+            <div class="std-item">
+              <h3>⑤ 지하 간략모드와 z, h</h3>
+              <p>
+                KDS 41 17 00에서 <strong>h</strong>는 구조물 밑면부터 지붕층 평균높이,
+                <strong>z</strong>는 구조물 밑면부터 비구조요소 부착높이입니다.
+                본 HTML의 <strong>지하 간략모드</strong>는 입력 생략을 위한 개략모드로
+                <strong>z = 0</strong>, 위치계수 <strong>1.0</strong>을 자동 적용합니다.
+              </p>
+            </div>
+
+            <div class="std-item">
+              <h3>⑥ 배근 간이 판정 기준</h3>
+              <p>
+                대표 철근은 <strong>직경 9 mm 이상</strong>, <strong>간격 450 mm 이하</strong>이면서
+                <strong>벽두께의 3배 이하</strong>인지 확인합니다.
+                <strong>벽두께가 200 mm 이상이면 양면 복근</strong> 여부를 추가 확인합니다.
+              </p>
+            </div>
+
+            <div class="std-item">
+              <h3>⑦ 두께 간이 판정 기준</h3>
+              <p>
+                최소두께는 <strong>벽 상단 4.5 m까지 150 mm</strong>,
+                그 아래는 <strong>3 m마다 10 mm 비율 증가</strong>로 계산합니다.
+                다만 <strong>120 mm 이상</strong>이면 구조계산으로 안전 확인 시 예외 가능으로 표기합니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="assumption">
+            <strong>유의사항</strong><br />
+            1) 본 파일은 <strong>하중 산정 + 최소 상세기준 점검용</strong>입니다.<br />
+            2) 실제 설계에는 층간변위 적합성, 접합·정착, 개구부, 장기 변형, 균열, 시공상세를 별도 검토해야 합니다.<br />
+            3) 지하 간략모드는 입력 편의를 위한 개략모드이므로, 실제 z·h를 반영해야 하는 경우에는 모드를 해제하여 직접 입력하십시오.<br />
+            4) 지하구조 영향에 따른 지반증폭 보정, S6 지반 응답해석, 부재 상세강도 산정은 본 HTML의 범위 밖입니다.
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>기준 참조 메모</h2>
+          <div class="tiny">
+            <div><span class="tag">KDS 17 10 00</span> 지진구역·위험도계수·지반분류(S1~S6)</div>
+            <div style="margin-top:8px"><span class="tag">KDS 41 17 00</span> 비구조요소 수평/수직 설계지진력, 표 18.3-1</div>
+            <div style="margin-top:8px"><span class="tag">건축물의 구조기준 등에 관한 규칙 제54조</span> 콘크리트벽 최소두께·배근 간격·양면 복근 여부</div>
+          </div>
+          <div class="footer">
+            기본 입력은 서울, S4, 위험도계수 2.0, 지하 간략모드 ON, 기준식 S = Z × I, 벽 두께 200 mm, 벽 높이 7.0 m, 검토 길이 1.0 m, D10@200 양면 복근입니다.
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const regions = {
+      seoul: { name: "서울", zone: "I", Z: 0.11 },
+      incheon: { name: "인천", zone: "I", Z: 0.11 },
+      daejeon: { name: "대전", zone: "I", Z: 0.11 },
+      busan: { name: "부산", zone: "I", Z: 0.11 },
+      daegu: { name: "대구", zone: "I", Z: 0.11 },
+      ulsan: { name: "울산", zone: "I", Z: 0.11 },
+      gwangju: { name: "광주", zone: "I", Z: 0.11 },
+      sejong: { name: "세종", zone: "I", Z: 0.11 },
+      gyeonggi: { name: "경기", zone: "I", Z: 0.11 },
+      chungbuk: { name: "충북", zone: "I", Z: 0.11 },
+      chungnam: { name: "충남", zone: "I", Z: 0.11 },
+      gyeongbuk: { name: "경북", zone: "I", Z: 0.11 },
+      gyeongnam: { name: "경남", zone: "I", Z: 0.11 },
+      jeonbuk: { name: "전북", zone: "I", Z: 0.11 },
+      jeonnam: { name: "전남", zone: "I", Z: 0.11 },
+      gangwon_south: { name: "강원 남부", zone: "I", Z: 0.11 },
+      gangwon_north: { name: "강원 북부", zone: "II", Z: 0.07 },
+      jeju: { name: "제주", zone: "II", Z: 0.07 }
+    };
+
+    const siteClasses = {
+      S1: {
+        name: "S1",
+        desc: "암반 지반",
+        Fa: [1.12, 1.12, 1.12],
+        Fv: [0.84, 0.84, 0.84],
+        special: false
+      },
+      S2: {
+        name: "S2",
+        desc: "얕고 단단한 지반",
+        Fa: [1.4, 1.4, 1.3],
+        Fv: [1.5, 1.4, 1.3],
+        special: false
+      },
+      S3: {
+        name: "S3",
+        desc: "얕고 연약한 지반",
+        Fa: [1.7, 1.5, 1.3],
+        Fv: [1.7, 1.6, 1.5],
+        special: false
+      },
+      S4: {
+        name: "S4",
+        desc: "깊고 단단한 지반",
+        Fa: [1.6, 1.4, 1.2],
+        Fv: [2.2, 2.0, 1.8],
+        special: false
+      },
+      S5: {
+        name: "S5",
+        desc: "깊고 연약한 지반",
+        Fa: [1.8, 1.3, 1.3],
+        Fv: [3.0, 2.7, 2.4],
+        special: false
+      },
+      S6: {
+        name: "S6",
+        desc: "부지고유 특성평가 및 지반응답해석이 요구되는 지반",
+        special: true
+      }
+    };
+
+    const wallTypes = {
+      general: {
+        title: "일반 내부 비구조벽체",
+        detail: "내부비구조벽체 및 칸막이벽 – 그밖의 벽과 칸막이",
+        ap: 1.0,
+        Rp: 2.5,
+        omega: 2.0
+      },
+      cantilever: {
+        title: "내부 캔틸레버 비구조벽체",
+        detail: "캔틸레버부재 – 파라펫 및 내부 캔틸레버 비구조벽체",
+        ap: 2.5,
+        Rp: 2.5,
+        omega: 2.0
+      }
+    };
+
+    const defaults = {
+      region: "seoul",
+      siteClass: "S4",
+      hazard: "2.00",
+      sMethod: "code",
+      sMapInput: "0.176",
+      undergroundMode: true,
+      wallType: "general",
+      ip: "1.0",
+      zInput: "0.00",
+      hInput: "7.00",
+      thk: "200",
+      wallHeight: "7.00",
+      length: "1.00",
+      gamma: "24.0",
+      barDia: "10",
+      barSpacing: "200",
+      faces: "2"
+    };
+
+    function $(id){ return document.getElementById(id); }
+    function setText(id, text){ $(id).textContent = text; }
+    function setHtml(id, html){ $(id).innerHTML = html; }
+    function setValue(id, value){ $(id).value = value; }
+    function n(id){
+      const value = parseFloat($(id).value);
+      return Number.isFinite(value) ? value : 0;
+    }
+    function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+    function f(v, d=3){
+      return Number(v).toLocaleString("ko-KR", {
+        minimumFractionDigits: d,
+        maximumFractionDigits: d
+      });
+    }
+    function f0(v){
+      return Number(v).toLocaleString("ko-KR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+    }
+    function f2(v){
+      return Number(v).toLocaleString("ko-KR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function setStatus(id, kind, label){
+      const el = $(id);
+      el.className = `status ${kind}`;
+      el.textContent = label;
+    }
+
+    function buildSelectOptions(){
+      const regionSelect = $("region");
+      const siteSelect = $("siteClass");
+      regionSelect.innerHTML = Object.entries(regions)
+        .map(([key, val]) => `<option value="${key}">${val.name}</option>`)
+        .join("");
+      siteSelect.innerHTML = Object.entries(siteClasses)
+        .map(([key, val]) => `<option value="${key}">${val.name} (${val.desc})</option>`)
+        .join("");
+    }
+
+    function resetDefaults(){
+      Object.entries(defaults).forEach(([key, val]) => {
+        const el = $(key);
+        if (!el) return;
+        if (el.type === "checkbox"){
+          el.checked = Boolean(val);
+        } else {
+          el.value = val;
+        }
+      });
+      calculate();
+    }
+
+    function interpolateCoefficient(values, S){
+      const x1 = 0.1, x2 = 0.2, x3 = 0.3;
+      const y1 = values[0], y2 = values[1], y3 = values[2];
+
+      if (S <= x1){
+        return { value: y1, text: `S ≤ 0.10 → 표값 ${f(y1,3)} 적용` };
+      }
+      if (S < x2){
+        const value = y1 + (S - x1) * (y2 - y1) / (x2 - x1);
+        return { value, text: `${f(y1,3)} + (S-${f(x1,2)})/(${f(x2,2)}-${f(x1,2)}) × (${f(y2,3)}-${f(y1,3)})` };
+      }
+      if (Math.abs(S - x2) < 1e-9){
+        return { value: y2, text: `S = 0.20 → 표값 ${f(y2,3)} 적용` };
+      }
+      if (S < x3){
+        const value = y2 + (S - x2) * (y3 - y2) / (x3 - x2);
+        return { value, text: `${f(y2,3)} + (S-${f(x2,2)})/(${f(x3,2)}-${f(x2,2)}) × (${f(y3,3)}-${f(y2,3)})` };
+      }
+      return { value: y3, text: `S ≥ 0.30 → 표값 ${f(y3,3)} 적용` };
+    }
+
+    function ruleMinThicknessMm(Hm){
+      const extra = Math.max(0, Hm - 4.5);
+      return 150 + (extra * 10 / 3);
+    }
+
+
+    function calculate(){
+      const region = regions[$("region").value];
+      const site = siteClasses[$("siteClass").value];
+      const wall = wallTypes[$("wallType").value];
+
+      const hazard = Math.max(n("hazard"), 0.01);
+      const sMethod = $("sMethod").value;
+      const SmapInput = Math.max(n("sMapInput"), 0);
+      const undergroundMode = $("undergroundMode").checked;
+
+      $("sMapInput").disabled = sMethod !== "map";
+      $("zInput").disabled = undergroundMode;
+      $("hInput").disabled = undergroundMode;
+
+      const Ip = Math.max(n("ip"), 0.1);
+      const manualZ = Math.max(n("zInput"), 0);
+      const manualH = Math.max(n("hInput"), 0.01);
+
+      let z = manualZ;
+      let h = manualH;
+      let zhRaw = manualZ / manualH;
+      let zh = clamp(zhRaw, 0, 1);
+      let loc = 1 + 2 * zh;
+
+      if (undergroundMode){
+        z = 0;
+        zhRaw = 0;
+        zh = 0;
+        loc = 1;
+      }
+
+      const tmm = Math.max(n("thk"), 1);
+      const H = Math.max(n("wallHeight"), 0.01);
+      const L = Math.max(n("length"), 0.01);
+      const gamma = Math.max(n("gamma"), 0.1);
+      const db = Math.max(n("barDia"), 1);
+      const sBar = Math.max(n("barSpacing"), 1);
+      const faces = parseInt($("faces").value, 10) || 1;
+
+      const Z = region.Z;
+      const Scode = Z * hazard;
+      const Sfloor = 0.8 * Scode;
+      const S = (sMethod === "map") ? Math.max(SmapInput, Sfloor) : Scode;
+
+      const t = tmm / 1000;
+      const V = t * H * L;
+      const Wp = gamma * V;
+      const wLine = Wp / L;
+
+      setValue("siteDesc", `${site.name} : ${site.desc}`);
+      setValue("zh", undergroundMode ? `자동 ${f(zh,3)}` : f(zh,3));
+      setText("zoneCell", region.zone);
+      setText("zoneText", `${region.name} → 지진구역 ${region.zone}`);
+      setText("zCell", f(Z,3));
+      setText("hazardCell", f(hazard,2));
+      setText("sCodeCell", f(Scode,3));
+      setText("sCodeExplain", `S0 = Z × I = ${f(Z,3)} × ${f(hazard,2)} = ${f(Scode,3)}`);
+      setText("sMapCell", sMethod === "map" ? f(SmapInput,3) : "미사용");
+      setText("sMapExplain", sMethod === "map" ? "국가지진위험지도에서 직접 입력한 값" : "기준식 S = Z × I 사용 시 미사용");
+      setText("sFloorCell", f(Sfloor,3));
+      setText("sFloorExplain", `국가지진위험지도로 S를 직접 사용할 때 적용되는 하한값 = 0.8 × ${f(Scode,3)}`);
+      setText("sCell", f(S,3));
+      if (sMethod === "map"){
+        const govern80 = SmapInput < Sfloor;
+        setText("sExplain", govern80
+          ? `S = max(Smap, 0.8×S0) = max(${f(SmapInput,3)}, ${f(Sfloor,3)}) = ${f(S,3)} → 80% 하한 지배`
+          : `S = max(Smap, 0.8×S0) = max(${f(SmapInput,3)}, ${f(Sfloor,3)}) = ${f(S,3)} → 지도값 사용`);
+      } else {
+        setText("sExplain", `기준식 사용 → S = S0 = ${f(S,3)} (추가 0.8 곱 없음)`);
+      }
+
+      setText("ipCell", f(Ip,1));
+      setText("apCell", f(wall.ap,1));
+      setText("apExplain", wall.detail);
+      setText("rpCell", f(wall.Rp,1));
+      setText("rpExplain", `표 18.3-1 / Ω0 = ${f(wall.omega,1)}`);
+      setText("locCell", f(loc,3));
+      if (undergroundMode){
+        setText("locExplain", "지하 간략모드 → z = 0 자동 적용, 위치계수 = 1.000");
+      } else {
+        setText("locExplain", `1 + 2×(${f(zh,3)}) = ${f(loc,3)}${zhRaw > 1 ? " (입력 z/h > 1.0 → 1.0으로 제한)" : ""}`);
+      }
+
+      setHtml("wallTypeNote", `현재 선택은 표 18.3-1의 <strong>“${wall.detail}”</strong>이며, <strong>a<sub>p</sub> = ${f(wall.ap,1)}</strong>, <strong>R<sub>p</sub> = ${f(wall.Rp,1)}</strong>를 적용합니다.`);
+
+      setText("vFormula", `V = t × H × L = (${f(tmm,0)} mm ÷ 1000) × ${f(H,3)} × ${f(L,3)}`);
+      setText("vResult", `${f(V,3)} m³`);
+      setText("wpFormula", `Wp = γ × V = ${f(gamma,1)} × ${f(V,3)}`);
+      setText("wpResult", `${f2(Wp)} kN`);
+      setText("wlineFormula", `Wp/L = ${f2(Wp)} ÷ ${f(L,3)}`);
+      setText("wlineResult", `${f2(wLine)} kN/m`);
+
+      if (site.special){
+        setText("faCell", "-");
+        setText("faExplain", "S6 지반 → 표준 Fa 사용 불가");
+        setText("fvCell", "-");
+        setText("fvExplain", "S6 지반 → 표준 Fv 사용 불가");
+        setText("sdsCell", "-");
+        setText("sdsExplain", "부지고유 특성평가 및 지반응답해석 필요");
+
+        [
+          ["fpEqFormula", "S6 지반 → 표준 비구조요소 하중 자동산정 대신 현장응답해석 필요"],
+          ["fpMinFormula", "S6 지반 → 자동산정 생략"],
+          ["fpMaxFormula", "S6 지반 → 자동산정 생략"],
+          ["fpUseFormula", "S6 지반 → 현장특성 반영 설계 필요"],
+          ["qhFormula", "S6 지반 → 자동산정 생략"],
+          ["fpvFormula", "S6 지반 → 자동산정 생략"],
+          ["qvFormula", "S6 지반 → 자동산정 생략"]
+        ].forEach(([id, txt]) => setText(id, txt));
+
+        ["fpEqResult","fpMinResult","fpMaxResult","fpUseResult","qhResult","fpvResult","qvResult"]
+          .forEach(id => setText(id, "현장해석"));
+        setText("governTag", "S6 지반");
+        setText("summaryMain", `S6 지반 → Wp = ${f2(Wp)} kN 까지 산정, 설계지진력은 현장응답해석 필요`);
+        setText("summarySub", `대표 하중 자동계산은 생략됩니다. 부지고유 특성평가와 지반응답해석 결과로 Fp를 결정하십시오.`);
+      } else {
+        const faData = interpolateCoefficient(site.Fa, S);
+        const fvData = interpolateCoefficient(site.Fv, S);
+        const Fa = faData.value;
+        const Fv = fvData.value;
+        const SDS = S * 2.5 * Fa * 2 / 3;
+
+        const FpEq = 0.4 * wall.ap * SDS * Wp / (wall.Rp / Ip) * loc;
+        const FpMin = 0.3 * SDS * Ip * Wp;
+        const FpMax = 1.6 * SDS * Ip * Wp;
+        const FpUse = Math.min(FpMax, Math.max(FpEq, FpMin));
+        let govern = "식(18.2-1) 지배";
+        if (Math.abs(FpUse - FpMin) < 1e-9) govern = "하한값 식(18.2-3) 지배";
+        else if (Math.abs(FpUse - FpMax) < 1e-9) govern = "상한값 식(18.2-2) 지배";
+
+        const qh = FpUse / (H * L);
+        const Fpv = 0.2 * SDS * Wp;
+        const qv = Fpv / (H * L);
+        const fpLine = FpUse / L;
+        const fvLine = Fpv / L;
+
+        setText("faCell", f(Fa,3));
+        setText("faExplain", `${site.name} ${site.desc} / ${faData.text}`);
+        setText("fvCell", f(Fv,3));
+        setText("fvExplain", `${site.name} ${site.desc} / ${fvData.text}`);
+        setText("sdsCell", f(SDS,3));
+        setText("sdsExplain", `SDS = S × 2.5 × Fa × 2/3 = ${f(S,3)} × 2.5 × ${f(Fa,3)} × 2/3`);
+
+        setText("fpEqFormula", `Fp,calc = 0.4 × ap × SDS × Wp ÷ (Rp/Ip) × (1+2z/h) = 0.4 × ${f(wall.ap,1)} × ${f(SDS,3)} × ${f2(Wp)} ÷ (${f(wall.Rp,1)}/${f(Ip,1)}) × ${f(loc,3)}`);
+        setText("fpEqResult", `${f2(FpEq)} kN`);
+
+        setText("fpMinFormula", `Fp,min = 0.3 × SDS × Ip × Wp = 0.3 × ${f(SDS,3)} × ${f(Ip,1)} × ${f2(Wp)}`);
+        setText("fpMinResult", `${f2(FpMin)} kN`);
+
+        setText("fpMaxFormula", `Fp,max = 1.6 × SDS × Ip × Wp = 1.6 × ${f(SDS,3)} × ${f(Ip,1)} × ${f2(Wp)}`);
+        setText("fpMaxResult", `${f2(FpMax)} kN`);
+
+        setText("fpUseFormula", `Fp = max(Fp,calc, Fp,min) 이고 Fp,max를 초과하지 않음 → 적용값 = ${f2(FpUse)} kN`);
+        setText("fpUseResult", `${f2(FpUse)} kN`);
+        setText("governTag", govern);
+
+        setText("qhFormula", `qh = Fp ÷ (H × L) = ${f2(FpUse)} ÷ (${f(H,3)} × ${f(L,3)})`);
+        setText("qhResult", `${f2(qh)} kN/m²`);
+
+        setText("fpvFormula", `Fpv = ±0.2 × SDS × Wp = ±0.2 × ${f(SDS,3)} × ${f2(Wp)}`);
+        setText("fpvResult", `±${f2(Fpv)} kN`);
+
+        setText("qvFormula", `qv = Fpv ÷ (H × L) = ${f2(Fpv)} ÷ (${f(H,3)} × ${f(L,3)})`);
+        setText("qvResult", `±${f2(qv)} kN/m²`);
+
+        const modeBits = [];
+        modeBits.push(undergroundMode ? "지하 간략모드" : `z/h = ${f(zh,3)}`);
+        modeBits.push(sMethod === "map" ? `S = ${f(S,3)} (지도입력)` : `S = ${f(S,3)} (기준식)`);
+        setText("summaryMain", `수평 Fp = ${f2(FpUse)} kN  |  ${f2(fpLine)} kN/m  |  qh = ${f2(qh)} kN/m²`);
+        setText("summarySub", `수직 Fpv = ±${f2(Fpv)} kN  |  ±${f2(fvLine)} kN/m  |  qv = ±${f2(qv)} kN/m²  ·  ${govern}  ·  ${modeBits.join(" / ")}`);
+      }
+
+      const spacingLimit = Math.min(450, 3 * tmm);
+      const diaPass = db >= 9;
+      const spacingPass = sBar <= spacingLimit;
+      const facePass = tmm < 200 ? true : faces >= 2;
+      const rebarPass = diaPass && spacingPass && facePass;
+
+      const barArea = Math.PI * db * db / 4;
+      const asOne = barArea * 1000 / sBar;
+      const asTotal = asOne * faces;
+
+      setText("rebarDiaCheck", diaPass ? `D${f0(db)} ≥ D9 → 적합` : `D${f0(db)} < D9 → 보완 필요`);
+      setText("rebarSpacingCheck", spacingPass ? `${f0(sBar)} mm ≤ ${f0(spacingLimit)} mm → 적합` : `${f0(sBar)} mm > ${f0(spacingLimit)} mm → 보완 필요`);
+      setText("rebarFaceCheck", facePass ? (tmm >= 200 ? `t ≥ 200 mm, 양면 복근 입력 → 적합` : `t < 200 mm, 양면 요구 없음`) : `t ≥ 200 mm → 양면 복근 필요`);
+      setText("spacingLimit", `${f0(spacingLimit)} mm ( = min(450, 3t) )`);
+      setText("asOneFace", `${f0(asOne)} mm²/m`);
+      setText("asTotal", `${f0(asTotal)} mm²/m`);
+
+      if (rebarPass){
+        setStatus("rebarStatus", "ok", "적정");
+        setText("rebarNote", "입력 직경·간격 및 배근면수는 간이 최소 기준을 만족합니다.");
+      } else {
+        setStatus("rebarStatus", "bad", "보완 필요");
+        const reasons = [];
+        if (!diaPass) reasons.push("직경을 9 mm 이상으로 키워야 합니다");
+        if (!spacingPass) reasons.push(`간격을 ${f0(spacingLimit)} mm 이하로 줄여야 합니다`);
+        if (!facePass) reasons.push("두께 200 mm 이상 벽은 양면 복근이 필요합니다");
+        setText("rebarNote", `보완사항: ${reasons.join(" / ")}`);
+      }
+
+      const tReq = ruleMinThicknessMm(H);
+      const slender = (H * 1000) / tmm;
+      setText("thkInputView", `${f0(tmm)} mm`);
+      setText("thkReq", `${f(tReq,1)} mm`);
+      setText("slenderness", `${f(slender,2)}`);
+
+      if (tmm >= tReq){
+        setStatus("thkStatus", "ok", "적정");
+        setText("thkCheckText", "규칙상 최소두께 만족");
+        setText("thkNote", "입력 벽두께가 제54조 기준 최소두께 이상입니다.");
+      } else if (tmm >= 120){
+        setStatus("thkStatus", "warn", "조건부");
+        setText("thkCheckText", "120 mm 이상, 구조계산 안전 확인 필요");
+        setText("thkNote", "규칙상 일반 최소두께에는 미달하지만, 120 mm 이상이면 구조계산으로 안전성이 확인될 경우 예외 가능 단서가 있습니다.");
+      } else {
+        setStatus("thkStatus", "bad", "보완 필요");
+        setText("thkCheckText", "최소두께 미달");
+        setText("thkNote", "120 mm 미만이므로 규칙상 예외 단서 적용 범위에도 들지 않습니다.");
+      }
+    }
+
+    buildSelectOptions();
+
+    Object.entries(defaults).forEach(([key, val]) => {
+      const el = $(key);
+      if (!el) return;
+      if (el.type === "checkbox"){
+        el.checked = Boolean(val);
+      } else {
+        el.value = val;
+      }
+    });
+
+    [
+      "region","siteClass","hazard","sMethod","sMapInput","undergroundMode",
+      "wallType","ip","zInput","hInput","thk","wallHeight","length",
+      "gamma","barDia","barSpacing","faces"
+    ].forEach(id => {
+      $(id).addEventListener("input", calculate);
+      $(id).addEventListener("change", calculate);
+    });
+
+    calculate();
+  </script>
+</body>
+</html>
