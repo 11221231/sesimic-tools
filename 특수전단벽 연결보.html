@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>특수전단벽 연결보 (Coupling Beam)</title>
+  <style>
+    :root{
+      --bg:#f3f5f8;
+      --card:#ffffff;
+      --line:#1f1f1f;
+      --soft-line:#d8dde5;
+      --muted:#667085;
+      --accent:#111827;
+      --ok:#1358d6;
+      --ng:#c62828;
+      --shadow:0 10px 30px rgba(17, 24, 39, 0.10);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+      background:var(--bg);
+      color:#111;
+      line-height:1.55;
+      letter-spacing:-0.01em;
+    }
+    button,input,select,textarea{
+      font:inherit;
+    }
+    .app{
+      max-width:1440px;
+      margin:0 auto;
+      padding:16px;
+    }
+    .toolbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      padding:10px 0 14px;
+      background:rgba(243,245,248,.92);
+      backdrop-filter:blur(10px);
+    }
+    .toolbar-inner{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .toolbar-spacer{
+      flex:1 1 auto;
+    }
+    .btn{
+      appearance:none;
+      border:0;
+      padding:14px 20px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:800;
+      box-shadow:0 4px 12px rgba(17,24,39,.08);
+      transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+    }
+    .btn:hover{ transform:translateY(-1px); box-shadow:0 8px 18px rgba(17,24,39,.12); }
+    .btn:active{ transform:translateY(0); }
+    .btn-primary{
+      background:#111827;
+      color:#fff;
+    }
+    .btn-secondary{
+      background:#fff;
+      color:#111827;
+      border:1px solid #d0d5dd;
+    }
+    .layout{
+      display:grid;
+      grid-template-columns:minmax(320px, 420px) minmax(0, 1fr);
+      gap:20px;
+      align-items:start;
+    }
+    .panel{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(17,24,39,.06);
+    }
+    .control-panel{
+      padding:18px;
+    }
+    .panel-title{
+      font-size:20px;
+      font-weight:900;
+      margin:0 0 4px;
+    }
+    .panel-sub{
+      font-size:13px;
+      color:var(--muted);
+      margin:0 0 16px;
+    }
+    .field-group{
+      margin-top:16px;
+      padding-top:16px;
+      border-top:1px solid #eaecf0;
+    }
+    .field-group:first-of-type{
+      margin-top:0;
+      padding-top:0;
+      border-top:0;
+    }
+    .group-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin:0 0 12px;
+      font-size:15px;
+      font-weight:800;
+      color:#111827;
+    }
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .form-grid.meta-grid{
+      grid-template-columns:1fr 1fr;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    .field.full{
+      grid-column:1 / -1;
+    }
+    .field label{
+      font-size:12px;
+      color:#475467;
+      font-weight:700;
+    }
+    .field input,
+    .field select{
+      width:100%;
+      height:44px;
+      border:1px solid #d0d5dd;
+      border-radius:12px;
+      padding:0 12px;
+      background:#fff;
+      color:#111827;
+      outline:none;
+      transition:border-color .15s ease, box-shadow .15s ease;
+    }
+    .check-wrap{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      min-height:44px;
+      padding:11px 13px;
+      border:1px solid #d0d5dd;
+      border-radius:12px;
+      background:#fff;
+    }
+    .check-wrap input[type="checkbox"]{
+      width:18px;
+      height:18px;
+      margin:2px 0 0;
+      accent-color:#111827;
+      flex:0 0 auto;
+    }
+    .check-label{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+      cursor:pointer;
+    }
+    .check-text{
+      font-size:13px;
+      color:#111827;
+      font-weight:800;
+      line-height:1.35;
+    }
+    .check-sub{
+      font-size:11px;
+      color:#667085;
+      line-height:1.5;
+      font-weight:500;
+    }
+    .field input:focus,
+    .field select:focus{
+      border-color:#111827;
+      box-shadow:0 0 0 4px rgba(17,24,39,.08);
+    }
+    .hint{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+    details.advanced{
+      margin-top:14px;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      overflow:hidden;
+      background:#fafbfc;
+    }
+    details.advanced summary{
+      cursor:pointer;
+      list-style:none;
+      padding:12px 14px;
+      font-weight:800;
+      font-size:14px;
+      color:#111827;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    details.advanced summary::-webkit-details-marker{display:none}
+    details.advanced .advanced-inner{
+      padding:0 14px 14px;
+      border-top:1px solid #eaecf0;
+    }
+    .status-card{
+      margin-top:16px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:#f8fafc;
+      border:1px solid #e5e7eb;
+      font-size:13px;
+      color:#344054;
+    }
+    .status-card strong{
+      color:#111827;
+    }
+
+    .report-wrap{
+      min-width:0;
+    }
+    .report-page{
+      width:min(210mm, 100%);
+      min-height:297mm;
+      margin:0 auto;
+      background:#fff;
+      padding:12mm 10mm 12mm;
+      box-shadow:var(--shadow);
+      border-radius:12px;
+      border:1px solid rgba(17,24,39,.08);
+      overflow:hidden;
+    }
+    .meta-table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      font-size:12px;
+    }
+    .meta-table td{
+      border:2px solid #202020;
+      padding:6px 8px;
+      vertical-align:middle;
+    }
+    .meta-head{
+      width:15%;
+      text-align:center;
+      font-weight:900;
+      background:#fafafa;
+    }
+    .meta-value{
+      width:35%;
+    }
+    .report-title{
+      text-align:center;
+      font-size:clamp(20px, 2.2vw, 34px);
+      font-weight:900;
+      margin:22px 0 18px;
+      padding-bottom:6px;
+      border-bottom:3px solid #202020;
+    }
+    .section-block{
+      margin-top:18px;
+    }
+    .section-head{
+      font-size:20px;
+      font-weight:900;
+      border-bottom:2px solid #404040;
+      padding-bottom:4px;
+      margin-bottom:12px;
+    }
+    .conditions-layout{
+      display:grid;
+      grid-template-columns:minmax(0, 1.34fr) minmax(300px, 0.66fr);
+      gap:18px;
+      align-items:start;
+    }
+    .conditions-list{
+      font-size:13px;
+      min-width:0;
+      font-feature-settings:"tnum";
+    }
+    .conditions-row{
+      display:grid;
+      grid-template-columns:88px 12px minmax(0, 1fr);
+      gap:6px;
+      padding:4px 0;
+      align-items:baseline;
+    }
+    .conditions-key{
+      font-weight:800;
+      min-width:0;
+      white-space:nowrap;
+    }
+    .conditions-eq{
+      text-align:center;
+      align-self:baseline;
+    }
+    .conditions-value{
+      min-width:0;
+      white-space:nowrap;
+      word-break:keep-all;
+      line-height:1.35;
+      letter-spacing:-0.03em;
+      font-size:12px;
+    }
+    .placeholder{
+      color:#98a2b3;
+    }
+    .diagram-box{
+      border:1.5px solid #8a8f98;
+      padding:8px 8px 10px;
+      background:#fbfbfb;
+    }
+    .diagram-box svg{
+      display:block;
+    }
+    .diagram-caption{
+      margin-top:8px;
+      font-size:11.5px;
+      color:#667085;
+      line-height:1.55;
+      word-break:keep-all;
+    }
+    .basis-note{
+      margin-top:14px;
+      padding:12px 14px;
+      background:#f8fafc;
+      border:1px solid #e4e7ec;
+      border-radius:12px;
+      font-size:12.5px;
+      color:#475467;
+      line-height:1.65;
+      width:100%;
+      word-break:keep-all;
+    }
+    .fixed-policy-note{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:#f8fafc;
+      border:1px solid #e4e7ec;
+      font-size:12px;
+      color:#475467;
+      line-height:1.55;
+    }
+    .field-note{
+      font-size:11px;
+      color:#667085;
+      line-height:1.45;
+      margin-top:2px;
+    }
+    .summary-meta{
+      margin-bottom:8px;
+      font-size:12.5px;
+      color:#475467;
+      line-height:1.55;
+      word-break:keep-all;
+    }
+    .calc-item{
+      position:relative;
+      padding-right:182px;
+      margin-top:18px;
+    }
+    .calc-item:first-child{
+      margin-top:0;
+    }
+    .calc-head{
+      font-weight:900;
+      font-size:16px;
+      margin-bottom:6px;
+    }
+    .code-ref{
+      position:absolute;
+      right:0;
+      top:1px;
+      color:#667085;
+      font-size:12px;
+      text-align:right;
+      line-height:1.35;
+    }
+    .calc-list{
+      margin:0;
+      padding-left:18px;
+      font-size:14px;
+    }
+    .calc-list li{
+      margin:3px 0;
+    }
+    .calc-line-strong{
+      font-weight:800;
+      margin-top:5px;
+    }
+    .status{
+      font-weight:900;
+      margin-left:6px;
+    }
+    .ok{color:var(--ok)}
+    .ng{color:var(--ng)}
+    .summary-box{
+      border:2px solid #202020;
+      padding:10px 12px;
+      min-height:108px;
+      font-size:14px;
+    }
+    .summary-lead{
+      font-weight:900;
+      margin-bottom:8px;
+    }
+    .summary-box ul{
+      margin:0;
+      padding-left:18px;
+    }
+    .summary-box li{
+      margin:4px 0;
+    }
+    .error-box{
+      border:2px solid #c62828;
+      background:#fff7f7;
+      padding:14px 16px;
+      border-radius:14px;
+      color:#8c1d18;
+      margin-top:10px;
+      font-size:14px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#1d4ed8;
+      font-weight:800;
+      font-size:12px;
+    }
+    .screen-note{
+      margin-top:14px;
+      font-size:12px;
+      color:#667085;
+      text-align:right;
+    }
+
+    @page{
+      size:A4;
+      margin:10mm;
+    }
+
+    @media (max-width: 1080px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+      .control-panel{
+        order:0;
+      }
+      .report-wrap{
+        order:1;
+      }
+    }
+    @media (max-width: 720px){
+      .app{
+        padding:12px;
+      }
+      .toolbar{
+        padding-top:6px;
+      }
+      .toolbar-inner{
+        align-items:stretch;
+      }
+      .toolbar-spacer{
+        display:none;
+      }
+      .btn{
+        flex:1 1 calc(50% - 6px);
+        min-width:0;
+        padding:13px 14px;
+      }
+      .form-grid,
+      .form-grid.meta-grid{
+        grid-template-columns:1fr;
+      }
+      .report-page{
+        width:100%;
+        min-height:auto;
+        padding:7mm 4mm 8mm;
+        border-radius:10px;
+      }
+      .meta-table{
+        font-size:11px;
+      }
+      .meta-table td{
+        padding:4px 5px;
+      }
+      .report-title{
+        margin:16px 0 14px;
+        padding-bottom:5px;
+      }
+      .section-head{
+        font-size:18px;
+      }
+      .conditions-layout{
+        grid-template-columns:1fr;
+      }
+      .conditions-list{
+        font-size:13px;
+      }
+      .conditions-row{
+        grid-template-columns:92px 12px minmax(0, 1fr);
+        gap:6px;
+      }
+      .conditions-value{
+        white-space:normal;
+        font-size:12.8px;
+        line-height:1.5;
+      }
+      .calc-item{
+        padding-right:0;
+      }
+      .code-ref{
+        position:static;
+        margin-bottom:4px;
+        text-align:left;
+      }
+      .calc-list{
+        font-size:13px;
+      }
+      .summary-box{
+        font-size:13px;
+      }
+      .screen-note{
+        text-align:left;
+      }
+    }
+    @media print{
+      body{
+        background:#fff;
+      }
+      .toolbar,
+      .control-panel,
+      .screen-note{
+        display:none !important;
+      }
+      .app{
+        max-width:none;
+        padding:0;
+      }
+      .layout{
+        display:block;
+      }
+      .report-page{
+        width:190mm;
+        min-height:auto;
+        margin:0;
+        box-shadow:none;
+        border:0;
+        border-radius:0;
+        padding:0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="toolbar">
+      <div class="toolbar-inner">
+        <button class="btn btn-primary" type="button" id="calcBtn">계산하기</button>
+        <button class="btn btn-secondary" type="button" id="pdfBtn">PDF 내보내기</button>
+        <div class="toolbar-spacer"></div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="panel control-panel">
+        <h1 class="panel-title">입력 조건</h1>
+        <p class="panel-sub">샘플값 없이 빈 상태로 시작합니다. 입력 후 <strong>계산하기</strong>를 누르면 아래 보고서가 갱신됩니다.</p>
+
+        <form id="designForm" novalidate>
+          <section class="field-group">
+            <h2 class="group-title">기본 정보</h2>
+            <div class="form-grid meta-grid">
+              <div class="field">
+                <label for="project">PROJECT</label>
+                <input id="project" name="project" type="text" placeholder="프로젝트명">
+              </div>
+              <div class="field">
+                <label for="calculBy">CACUL. BY</label>
+                <input id="calculBy" name="calculBy" type="text" placeholder="작성자">
+              </div>
+              <div class="field">
+                <label for="memberName">부재명</label>
+                <input id="memberName" name="memberName" type="text" placeholder="예: CB-1">
+              </div>
+              <div class="field">
+                <label for="reportDate">DATE</label>
+                <input id="reportDate" name="reportDate" type="text" placeholder="자동입력">
+              </div>
+              <div class="field full">
+                <label for="subject">SUBJECT</label>
+                <input id="subject" name="subject" type="text" placeholder="검토 대상">
+              </div>
+            </div>
+            <div class="fixed-policy-note"><strong>분기 기준</strong>: KDS 14 20 80(2021) 4.7.7에 따라 기본 분기는 <strong>lₙ/h ≥ 4 → 4.4 보 요구사항</strong>, <strong>lₙ/h &lt; 4 → 대각선 보강 연결보</strong>로 처리합니다. 필요 시 아래 옵션으로 코드상 4.4 분기에서도 대각선 보강을 수동 적용할 수 있습니다.</div>
+          </section>
+
+          <section class="field-group">
+            <h2 class="group-title">설계 조건</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="b">부재 폭 b (mm)</label>
+                <input id="b" name="b" type="number" inputmode="decimal" min="0" step="any" placeholder="숫자 입력">
+              </div>
+              <div class="field">
+                <label for="h">부재 춤 h (mm)</label>
+                <input id="h" name="h" type="number" inputmode="decimal" min="0" step="any" placeholder="숫자 입력">
+              </div>
+              <div class="field">
+                <label for="ln">순경간 ln (mm)</label>
+                <input id="ln" name="ln" type="number" inputmode="decimal" min="0" step="any" placeholder="숫자 입력">
+              </div>
+              <div class="field">
+                <label for="cover">피복 c (mm)</label>
+                <input id="cover" name="cover" type="number" inputmode="decimal" min="0" step="any" placeholder="숫자 입력">
+              </div>
+              <div class="field">
+                <label for="fck">콘크리트 강도 fck (MPa)</label>
+                <input id="fck" name="fck" type="number" inputmode="decimal" min="0" step="any" placeholder="숫자 입력">
+              </div>
+              <div class="field">
+                <label for="fy">주근 항복강도 fy (MPa)</label>
+                <input id="fy" name="fy" type="number" inputmode="decimal" min="0" step="any" placeholder="숫자 입력">
+              </div>
+              <div class="field">
+                <label for="Vu">계수전단력 Vu (kN)</label>
+                <input id="Vu" name="Vu" type="number" inputmode="decimal" min="0" step="any" placeholder="숫자 입력">
+              </div>
+              <div class="field">
+                <label for="Mu">계수휨모멘트 Mu (kN·m)</label>
+                <input id="Mu" name="Mu" type="number" inputmode="decimal" min="0" step="any" placeholder="숫자 입력">
+              </div>
+              <div class="field">
+                <label for="diagW">대각철근 다발 가로치수 a<sub>d</sub> (mm)</label>
+                <input id="diagW" name="diagW" type="number" inputmode="decimal" min="0" step="any" placeholder="대각선 보강 필요 시 입력">
+                <div class="field-note">대각철근 다발 외곽의 가로치수입니다. 부재 폭 b와 다른 값입니다.</div>
+              </div>
+              <div class="field">
+                <label for="diagH">대각철근 다발 세로치수 b<sub>d</sub> (mm)</label>
+                <input id="diagH" name="diagH" type="number" inputmode="decimal" min="0" step="any" placeholder="대각선 보강 필요 시 입력">
+                <div class="field-note">대각철근 다발 외곽의 세로치수입니다. 코드상 대각선 보강이 필요하거나 수동 적용 시 필수입니다.</div>
+              </div>
+              <div class="field full">
+                <label for="forceDiagonal">최종 분기 옵션</label>
+                <div class="check-wrap">
+                  <input id="forceDiagonal" name="forceDiagonal" type="checkbox">
+                  <label class="check-label" for="forceDiagonal">
+                    <span class="check-text">코드상 4.4 보 요구사항 분기여도 대각선 보강 적용</span>
+                    <span class="check-sub">코드상 기본 분기 표시는 그대로 유지하고, 최종 설계 분기만 대각선 보강 연결보로 전환합니다.</span>
+                  </label>
+                </div>
+              </div>
+              <div class="field full">
+                <label for="lateralStable">해석상 횡좌굴 안정성 확인</label>
+                <div class="check-wrap">
+                  <input id="lateralStable" name="lateralStable" type="checkbox">
+                  <label class="check-label" for="lateralStable">
+                    <span class="check-text">lₙ/h ≥ 4 연결보의 횡좌굴 안정성을 해석으로 확인함</span>
+                    <span class="check-sub">체크 시 2.1에 KDS 14 20 80(2021) 4.7.7(1) 단서사항을 함께 표시합니다. 4.4.1(2)(3)(4) 완화 가능 여부는 설계자 판단 사항으로 표기합니다.</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <details class="advanced">
+              <summary>고급 설정 <span class="hint">최신 기준 계산에 필요한 계수 입력</span></summary>
+              <div class="advanced-inner">
+                <div class="form-grid" style="margin-top:12px;">
+                  <div class="field">
+                    <label for="fyh">횡보강근 항복강도 fyh (MPa)</label>
+                    <input id="fyh" name="fyh" type="number" inputmode="decimal" min="0" step="any" placeholder="미입력 시 fy와 동일">
+                  </div>
+                  <div class="field">
+                    <label for="lambdaFactor">경량콘크리트 계수 λ</label>
+                    <input id="lambdaFactor" name="lambdaFactor" type="number" inputmode="decimal" min="0.1" step="any" value="1.0">
+                  </div>
+                  <div class="field">
+                    <label for="devAlpha">정착계수 α</label>
+                    <input id="devAlpha" name="devAlpha" type="number" inputmode="decimal" min="0.1" step="any" value="1.0">
+                  </div>
+                  <div class="field">
+                    <label for="devBeta">정착계수 β</label>
+                    <input id="devBeta" name="devBeta" type="number" inputmode="decimal" min="0.1" step="any" value="1.0">
+                  </div>
+                  <div class="field">
+                    <label for="preferredStirrup">기본 스터럽/후프근</label>
+                    <select id="preferredStirrup" name="preferredStirrup">
+                      <option value="D10">D10</option>
+                      <option value="D13">D13</option>
+                      <option value="D16">D16</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="roundingRule">간격 반올림 규칙</label>
+                    <select id="roundingRule" name="roundingRule">
+                      <option value="mixed">100mm 미만 5mm 절삭 / 100mm 이상 10mm 절삭</option>
+                      <option value="down10">10mm 절삭</option>
+                      <option value="down5">5mm 절삭</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="hint">정착·간격 계수는 프로젝트별 상세조건(상부근, 에폭시, 피복, 구속조건 등)에 맞게 조정하세요.</div>
+              </div>
+            </details>
+          </section>
+        </form>
+
+        <div class="status-card" id="statusCard">
+          <strong>기준 적용 상태:</strong> 입력 후 계산 대기
+        </div>
+      </aside>
+
+      <main class="report-wrap">
+        <article class="report-page" id="reportRoot"></article>
+        <div class="screen-note">PDF 내보내기는 브라우저 인쇄 대화상자를 사용합니다. 인쇄 대상은 오른쪽 계산 보고서만 남도록 구성되어 있습니다.</div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const BAR_DB = {
+      D10: { d: 10, area: 71.3 },
+      D13: { d: 13, area: 126.7 },
+      D16: { d: 16, area: 198.6 },
+      D19: { d: 19, area: 286.5 },
+      D22: { d: 22, area: 387.1 },
+      D25: { d: 25, area: 506.7 },
+      D29: { d: 29, area: 642.4 },
+      D32: { d: 32, area: 794.2 }
+    };
+    const MAIN_BAR_OPTIONS = ["D13", "D16", "D19", "D22", "D25", "D29", "D32"];
+    const DIAGONAL_BAR_OPTIONS = ["D16", "D19", "D22", "D25", "D29", "D32"];
+    const STIRRUP_BAR_OPTIONS = ["D10", "D13", "D16"];
+
+    const PHI_SHEAR = 0.75;
+    const BASIS_TEXT = "적용 기준: KDS 14 20 80(2021) / KDS 14 20 20(2022) / KDS 14 20 22(2022) / KDS 14 20 50(2022) / KDS 14 20 52(2024)";
+    const STATE = {
+      lastResult: null,
+      lastError: null
+    };
+
+    function escapeHtml(value){
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function fmt(value, digits = 1){
+      if (!Number.isFinite(value)) return "—";
+      return new Intl.NumberFormat("ko-KR", {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      }).format(value);
+    }
+
+    function fmt0(value){
+      if (!Number.isFinite(value)) return "—";
+      return new Intl.NumberFormat("ko-KR", {
+        maximumFractionDigits: 0
+      }).format(Math.round(value));
+    }
+
+    function fmtT(value, digits = 1){
+      if (!Number.isFinite(value)) return "—";
+      return new Intl.NumberFormat("ko-KR", {
+        maximumFractionDigits: digits
+      }).format(value);
+    }
+
+    function fmtAuto(value, digits = 1){
+      if (!Number.isFinite(value)) return "—";
+      const isInt = Math.abs(value - Math.round(value)) < 1e-9;
+      return new Intl.NumberFormat("ko-KR", {
+        minimumFractionDigits: isInt ? 0 : digits,
+        maximumFractionDigits: isInt ? 0 : digits
+      }).format(value);
+    }
+
+    function blank(value){
+      if (value === null || value === undefined || value === "") {
+        return '<span class="placeholder">—</span>';
+      }
+      return escapeHtml(String(value));
+    }
+
+    function yesno(ok){
+      return ok ? '<span class="status ok">OK</span>' : '<span class="status ng">NG</span>';
+    }
+
+    function dateString(){
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = now.getMonth() + 1;
+      const d = now.getDate();
+      return `${y}년 ${m}월 ${d}일`;
+    }
+
+    function barArea(name){
+      return BAR_DB[name].area;
+    }
+
+    function barDia(name){
+      return BAR_DB[name].d;
+    }
+
+    function deg(rad){
+      return rad * 180 / Math.PI;
+    }
+
+    function beta1(fck){
+      if (fck <= 28) return 0.85;
+      return Math.max(0.65, 0.85 - 0.05 * ((fck - 28) / 7));
+    }
+
+    function flexurePhiFromEt(et){
+      if (et <= 0.002) return 0.65;
+      if (et >= 0.005) return 0.9;
+      return 0.65 + (et - 0.002) * (0.25 / 0.003);
+    }
+
+    function roundDownByRule(value, rule){
+      if (!Number.isFinite(value)) return value;
+      if (value <= 0) return value;
+      if (rule === "down5"){
+        return Math.floor(value / 5) * 5;
+      }
+      if (rule === "down10"){
+        return Math.floor(value / 10) * 10;
+      }
+      if (value < 100){
+        return Math.floor(value / 5) * 5;
+      }
+      return Math.floor(value / 10) * 10;
+    }
+
+    function roundUp(value, unit){
+      if (!Number.isFinite(value)) return value;
+      return Math.ceil(value / unit) * unit;
+    }
+
+    function getValue(id){
+      return document.getElementById(id).value.trim();
+    }
+
+    function parseRequiredNumber(id, label){
+      const raw = getValue(id);
+      if (raw === "") {
+        throw new Error(`${label} 값을 입력하세요.`);
+      }
+      const num = Number(raw);
+      if (!Number.isFinite(num) || num <= 0){
+        throw new Error(`${label} 값이 올바르지 않습니다.`);
+      }
+      return num;
+    }
+
+    function parseOptionalNumber(id){
+      const raw = getValue(id);
+      if (raw === "") return null;
+      const num = Number(raw);
+      if (!Number.isFinite(num)) return null;
+      return num;
+    }
+
+    function chooseUniformBars(requiredArea, options, minCount = 2, maxCount = 10, preferCount = null){
+      const candidates = [];
+      for (const bar of options){
+        for (let count = minCount; count <= maxCount; count += 1){
+          const area = count * barArea(bar);
+          if (area >= requiredArea){
+            const countPenalty = preferCount === null ? 0 : Math.abs(count - preferCount);
+            candidates.push({
+              bar,
+              count,
+              area,
+              excess: area - requiredArea,
+              countPenalty,
+              totalSteelMetric: area
+            });
+          }
+        }
+      }
+      candidates.sort((a, b) => {
+        if (a.totalSteelMetric !== b.totalSteelMetric) return a.totalSteelMetric - b.totalSteelMetric;
+        if (a.countPenalty !== b.countPenalty) return a.countPenalty - b.countPenalty;
+        if (a.count !== b.count) return a.count - b.count;
+        return barDia(a.bar) - barDia(b.bar);
+      });
+      return candidates[0] || null;
+    }
+
+    function chooseSymmetricBarsByTotalArea(totalRequiredArea, options, minFaceCount = 2, maxFaceCount = 6){
+      const faceRequired = totalRequiredArea / 2;
+      const candidates = [];
+      for (const bar of options){
+        for (let countPerFace = minFaceCount; countPerFace <= maxFaceCount; countPerFace += 1){
+          const faceArea = countPerFace * barArea(bar);
+          const totalArea = faceArea * 2;
+          if (faceArea >= faceRequired){
+            candidates.push({
+              bar,
+              countPerFace,
+              faceArea,
+              totalArea,
+              excess: totalArea - totalRequiredArea
+            });
+          }
+        }
+      }
+      candidates.sort((a, b) => {
+        if (a.totalArea !== b.totalArea) return a.totalArea - b.totalArea;
+        if (a.countPerFace !== b.countPerFace) return a.countPerFace - b.countPerFace;
+        return barDia(a.bar) - barDia(b.bar);
+      });
+      return candidates[0] || null;
+    }
+
+    function chooseOrdinaryMainBars(mu, b, h, cover, fck, fy, lambda, stirrupBar){
+      const candidates = [];
+      for (const bar of MAIN_BAR_OPTIONS){
+        const db = barDia(bar);
+        const d = h - cover - barDia(stirrupBar) - db / 2;
+        if (d <= 0) continue;
+        const asMin = Math.max(0.25 * lambda * Math.sqrt(fck) / fy * b * d, 1.4 * b * d / fy);
+        for (let countPerFace = 2; countPerFace <= 8; countPerFace += 1){
+          const asFace = countPerFace * barArea(bar);
+          if (asFace < asMin) continue;
+
+          const a = asFace * fy / (0.85 * fck * b);
+          if (a >= d) continue;
+
+          const c = a / beta1(fck);
+          const et = 0.003 * (d - c) / c;
+          const phi = flexurePhiFromEt(et);
+          const mn = asFace * fy * (d - a / 2) / 1e6;
+          const phiMn = phi * mn;
+
+          if (phiMn >= mu){
+            candidates.push({
+              bar,
+              countPerFace,
+              faceArea: asFace,
+              totalArea: asFace * 2,
+              d,
+              a,
+              c,
+              et,
+              phi,
+              mn,
+              phiMn,
+              asMin
+            });
+          }
+        }
+      }
+      candidates.sort((a, b) => {
+        if (a.totalArea !== b.totalArea) return a.totalArea - b.totalArea;
+        if (a.countPerFace !== b.countPerFace) return a.countPerFace - b.countPerFace;
+        return barDia(a.bar) - barDia(b.bar);
+      });
+      return candidates[0] || null;
+    }
+
+    function chooseShearStirrups(vsReq, d, fyh, sMax, roundingRule){
+      const candidates = [];
+      for (const bar of STIRRUP_BAR_OPTIONS){
+        const av = 2 * barArea(bar);
+        const sReq = vsReq > 0 ? (av * fyh * d / (vsReq * 1000)) : Number.POSITIVE_INFINITY;
+        const sLimit = Math.min(sReq, sMax);
+        const sUse = roundDownByRule(sLimit, roundingRule);
+        candidates.push({
+          bar,
+          av,
+          sReq,
+          sMax,
+          sLimit,
+          sUse,
+          practical: Number.isFinite(sUse) ? sUse >= 40 : true
+        });
+      }
+      candidates.sort((a, b) => {
+        if (a.practical !== b.practical) return a.practical ? -1 : 1;
+        if (barDia(a.bar) !== barDia(b.bar)) return barDia(a.bar) - barDia(b.bar);
+        return (b.sUse || 0) - (a.sUse || 0);
+      });
+      return candidates[0] || null;
+    }
+
+    function chooseBeamDirectionStirrups(b, h, roundingRule){
+      const candidates = [];
+      for (const bar of STIRRUP_BAR_OPTIONS){
+        const ash = 2 * barArea(bar);
+        const sReq = ash / (0.002 * b);
+        const sMax = Math.min(h / 2, 300);
+        const sLimit = Math.min(sReq, sMax);
+        const sUse = roundDownByRule(sLimit, roundingRule);
+        candidates.push({
+          bar,
+          ash,
+          sReq,
+          sMax,
+          sLimit,
+          sUse,
+          practical: sUse >= 40
+        });
+      }
+      candidates.sort((a, b) => {
+        if (a.practical !== b.practical) return a.practical ? -1 : 1;
+        if (barDia(a.bar) !== barDia(b.bar)) return barDia(a.bar) - barDia(b.bar);
+        return (b.sUse || 0) - (a.sUse || 0);
+      });
+      return candidates[0] || null;
+    }
+
+    function chooseDiagonalConfinement(diagW, diagH, beamWidth, fck, fyh, diagonalBar, roundingRule){
+      const candidates = [];
+      for (const bar of STIRRUP_BAR_OPTIONS){
+        const ash = 2 * barArea(bar);
+        const hc = Math.min(diagW, diagH);
+        const ag = diagW * diagH;
+        const ach = Math.max((diagW - 2 * barDia(bar)) * (diagH - 2 * barDia(bar)), 1);
+        const ratio = Math.max(ag / ach - 1, 0.0001);
+        const sCalc1 = ash / (0.3 * hc * (fck / fyh) * ratio);
+        const sCalc2 = ash / (0.09 * hc * (fck / fyh));
+        const sCalc = Math.min(sCalc1, sCalc2);
+        const sMax = Math.min(6 * barDia(diagonalBar), 150, beamWidth / 4);
+        const sLimit = Math.min(sCalc, sMax);
+        const sUse = roundDownByRule(sLimit, roundingRule);
+
+        candidates.push({
+          bar,
+          ash,
+          hc,
+          ag,
+          ach,
+          ratio,
+          sCalc1,
+          sCalc2,
+          sCalc,
+          sMax,
+          sLimit,
+          sUse,
+          practical: sUse >= 40
+        });
+      }
+
+      candidates.sort((a, b) => {
+        if (a.practical !== b.practical) return a.practical ? -1 : 1;
+        if (barDia(a.bar) !== barDia(b.bar)) return barDia(a.bar) - barDia(b.bar);
+        return (b.sUse || 0) - (a.sUse || 0);
+      });
+
+      return candidates[0] || null;
+    }
+
+    function developmentLength(db, fy, fck, lambda, alpha, beta){
+      const ldBasic = 0.6 * db * fy / (lambda * Math.sqrt(fck)) * alpha * beta;
+      const ldReq = Math.max(1.25 * ldBasic, 8 * db, 150);
+      const ldUse = roundUp(ldReq, 50);
+      return { ldBasic, ldReq, ldUse };
+    }
+
+    function validateResult(result){
+      const messages = [];
+      if (result.finalBranch === "beam44" && result.diagonalDesign) {
+        messages.push("분기 일관성 오류");
+      }
+      if (result.finalBranch === "diagonal" && !result.diagonalDesign) {
+        messages.push("분기 일관성 오류");
+      }
+      if (result.finalBranch === "beam44" && result.beam44Design && result.summaryLines.some(line => line.includes("대각선"))) {
+        messages.push("결론 자동조립 오류");
+      }
+      if (result.finalBranch === "diagonal" && result.diagonalDesign && result.diagonalDesign.phiVn < result.input.Vu) {
+        messages.push("배근 선택 검증 실패");
+      }
+      if (messages.length) {
+        throw new Error(messages.join(" / "));
+      }
+    }
+
+    function readInput(){
+      const input = {
+        project: getValue("project"),
+        calculBy: getValue("calculBy"),
+        subject: getValue("subject"),
+        memberName: getValue("memberName"),
+        reportDate: getValue("reportDate") || dateString(),
+        b: parseRequiredNumber("b", "부재 폭 b"),
+        h: parseRequiredNumber("h", "부재 춤 h"),
+        ln: parseRequiredNumber("ln", "순경간 ln"),
+        cover: parseRequiredNumber("cover", "피복 c"),
+        fck: parseRequiredNumber("fck", "콘크리트 강도 fck"),
+        fy: parseRequiredNumber("fy", "주근 항복강도 fy"),
+        fyh: parseOptionalNumber("fyh"),
+        Vu: parseRequiredNumber("Vu", "계수전단력 Vu"),
+        Mu: parseRequiredNumber("Mu", "계수휨모멘트 Mu"),
+        diagW: parseOptionalNumber("diagW"),
+        diagH: parseOptionalNumber("diagH"),
+        lambda: parseOptionalNumber("lambdaFactor") ?? 1.0,
+        devAlpha: parseOptionalNumber("devAlpha") ?? 1.0,
+        devBeta: parseOptionalNumber("devBeta") ?? 1.0,
+        preferredStirrup: getValue("preferredStirrup"),
+        roundingRule: getValue("roundingRule"),
+        forceDiagonal: document.getElementById("forceDiagonal").checked,
+        lateralStable: document.getElementById("lateralStable").checked
+      };
+
+      input.fyh = input.fyh || input.fy;
+
+      if (input.diagW !== null && input.diagW >= input.b) {
+        throw new Error("대각철근 다발 가로치수 a_d는 부재 폭 b보다 작아야 합니다.");
+      }
+      if (input.diagH !== null && input.diagH >= input.h) {
+        throw new Error("대각철근 다발 세로치수 b_d는 부재 춤 h보다 작아야 합니다.");
+      }
+      if (input.lambda <= 0) {
+        throw new Error("경량콘크리트 계수 λ는 0보다 커야 합니다.");
+      }
+      return input;
+    }
+
+    function performDesign(input){
+      const slenderness = input.ln / input.h;
+      const acp = input.b * input.h;
+      const vLimit = input.lambda * Math.sqrt(input.fck) / 3 * acp / 1000;
+      const beam44Trigger = slenderness >= 4.0;
+      const shearTrigger = input.Vu > vLimit;
+      const codeRequiresDiagonal = !beam44Trigger;
+      const codeText = beam44Trigger
+        ? "코드상 4.4 보 요구사항 적용 대상"
+        : "코드상 대각선 보강 연결보 분기";
+      const userForcedDiagonal = !!input.forceDiagonal;
+      const finalBranch = codeRequiresDiagonal || userForcedDiagonal ? "diagonal" : "beam44";
+      const branchReason = codeRequiresDiagonal ? "code_diagonal" : (userForcedDiagonal ? "user_override" : "beam44");
+      const codeStatusText = `lₙ / h = ${fmt(slenderness, 2)} ${beam44Trigger ? "≥" : "<"} 4.0`;
+      const shearStatusText = `Vᵤ = ${fmt(input.Vu, 1)} kN ${shearTrigger ? ">" : "≤"} Vₗᵢₘ = ${fmt(vLimit, 1)} kN`;
+
+      const result = {
+        input,
+        slenderness,
+        acp,
+        vLimit,
+        beam44Trigger,
+        shearTrigger,
+        codeRequiresDiagonal,
+        codeText,
+        userForcedDiagonal,
+        branchReason,
+        codeStatusText,
+        shearStatusText,
+        finalBranch,
+        basisText: BASIS_TEXT,
+        diagonalDesign: null,
+        beam44Design: null,
+        summaryLead: "",
+        summaryDetail: "",
+        summaryLines: []
+      };
+
+      if (finalBranch === "diagonal"){
+        if (input.diagW === null || input.diagH === null){
+          throw new Error("대각선 보강 분기를 사용하므로 대각철근 다발 치수 a_d, b_d를 입력하세요.");
+        }
+        const rise = input.h - input.diagH - 2 * input.cover;
+        if (rise <= 0){
+          throw new Error("대각선 각도 계산 오류: h - b_d - 2c 값이 0 이하입니다.");
+        }
+
+        const alpha = deg(Math.atan(rise / input.ln));
+        const sinAlpha = Math.sin(alpha * Math.PI / 180);
+        const fyDiag = Math.min(input.fy, 550);
+        const asDiagReq = input.Vu * 1000 / (2 * PHI_SHEAR * fyDiag * sinAlpha);
+
+        const diagonalGroup = chooseUniformBars(asDiagReq, DIAGONAL_BAR_OPTIONS, 2, 10, 3);
+        if (!diagonalGroup){
+          throw new Error("배근 선택 검증 실패: 대각선 주근 조합을 찾지 못했습니다.");
+        }
+
+        const vn = 2 * diagonalGroup.area * fyDiag * sinAlpha / 1000;
+        const phiVn = PHI_SHEAR * vn;
+        const vnMax = 0.83 * input.lambda * Math.sqrt(input.fck) * acp / 1000;
+        const dev = developmentLength(barDia(diagonalGroup.bar), fyDiag, input.fck, input.lambda, input.devAlpha, input.devBeta);
+
+        const confinement = chooseDiagonalConfinement(input.diagW, input.diagH, input.b, input.fck, input.fyh, diagonalGroup.bar, input.roundingRule);
+        if (!confinement){
+          throw new Error("배근 선택 검증 실패: 대각선 구속철근 조합을 찾지 못했습니다.");
+        }
+
+        const longitudinalReqTotal = 0.002 * input.b * input.h;
+        const longitudinal = chooseSymmetricBarsByTotalArea(longitudinalReqTotal, MAIN_BAR_OPTIONS, 2, 6);
+        if (!longitudinal){
+          throw new Error("배근 선택 검증 실패: 길이방향 철근 조합을 찾지 못했습니다.");
+        }
+
+        const beamDirection = chooseBeamDirectionStirrups(input.b, input.h, input.roundingRule);
+        if (!beamDirection){
+          throw new Error("배근 선택 검증 실패: 보방향 스터럽 조합을 찾지 못했습니다.");
+        }
+
+        result.diagonalDesign = {
+          rise,
+          alpha,
+          fyDiag,
+          asDiagReq,
+          diagonalGroup,
+          vn,
+          phiVn,
+          vnMax,
+          development: dev,
+          confinement,
+          longitudinalReqTotal,
+          longitudinal,
+          beamDirection
+        };
+
+        if (branchReason === "user_override"){
+          result.summaryLead = "코드상 lₙ/h ≥ 4로 4.4 보 요구사항 대상이나, 사용자 선택에 따라 대각선 보강을 적용함.";
+          result.summaryDetail = `판정 근거: ${result.codeStatusText}; 참고 전단비교: ${result.shearStatusText}; 최종 분기는 사용자 선택으로 대각선 보강 연결보`;
+        } else {
+          result.summaryLead = "최종 설계 분기: 대각선 보강 연결보";
+          result.summaryDetail = `판정 근거: ${result.codeStatusText}; 참고 전단비교: ${result.shearStatusText}`;
+        }
+
+        result.summaryLines = [
+          `대각선 주근: 각 조 ${diagonalGroup.count}-${diagonalGroup.bar}, 총 ${diagonalGroup.count * 2}-${diagonalGroup.bar} (Aᵥd,prov = ${fmt(diagonalGroup.area, 1)} mm² / 조, α = ${fmt(alpha, 2)}°)`,
+          `대각선 구속철근: ${confinement.bar} @ ${fmt0(confinement.sUse)} mm (${fmt0(input.diagW)}×${fmt0(input.diagH)} 다발 구간)`,
+          `연결보 길이방향 철근: 상·하부 각 ${longitudinal.countPerFace}-${longitudinal.bar} (Aprov,total = ${fmt(longitudinal.totalArea, 1)} mm²)`,
+          `연결보 보방향(수직) 스터럽: ${beamDirection.bar} @ ${fmt0(beamDirection.sUse)} mm`
+        ];
+      } else {
+        const ordinaryMain = chooseOrdinaryMainBars(input.Mu, input.b, input.h, input.cover, input.fck, input.fy, input.lambda, input.preferredStirrup);
+        if (!ordinaryMain){
+          throw new Error("배근 선택 검증 실패: 4.4 보 요구사항 분기 주근 조합을 찾지 못했습니다.");
+        }
+
+        const vc = 0.17 * input.lambda * Math.sqrt(input.fck) * input.b * ordinaryMain.d / 1000;
+        const vsReq = Math.max(input.Vu / PHI_SHEAR - vc, 0);
+        const sMax = Math.min(ordinaryMain.d / 2, 600);
+        const stirrup = chooseShearStirrups(vsReq, ordinaryMain.d, input.fyh, sMax, input.roundingRule);
+        if (!stirrup){
+          throw new Error("배근 선택 검증 실패: 4.4 보 요구사항 분기 스터럽 조합을 찾지 못했습니다.");
+        }
+
+        const dev = developmentLength(barDia(ordinaryMain.bar), Math.min(input.fy, 550), input.fck, input.lambda, input.devAlpha, input.devBeta);
+        const asMinTotal = ordinaryMain.asMin * 2;
+
+        result.beam44Design = {
+          ordinaryMain,
+          vc,
+          vsReq,
+          stirrup,
+          development: dev,
+          asMinTotal
+        };
+
+        result.summaryLead = "대각선 보강 미적용. KDS 14 20 80(2021) 4.7.7(1)에 따라 4.4 보 요구사항을 적용함.";
+        result.summaryDetail = `판정 근거: ${result.codeStatusText}; 참고 전단비교: ${result.shearStatusText}${input.lateralStable ? "; 해석에 의한 횡좌굴 안정성 확인 입력" : ""}`;
+        result.summaryLines = [
+          `주근: 상·하부 각 ${ordinaryMain.countPerFace}-${ordinaryMain.bar} (Aprov,total = ${fmt(ordinaryMain.totalArea, 1)} mm²)`,
+          `스터럽: ${stirrup.bar} @ ${fmt0(stirrup.sUse)} mm`,
+          `정착 상세: 기본 인장 정착길이 ${fmt(ordinaryDesignSafe(dev.ldBasic), 1)} mm, 설계 반영 ${fmt0(dev.ldUse)} mm`,
+          input.lateralStable ? "횡좌굴 안정성: 해석으로 적정성 확인 입력" : "횡좌굴 안정성: 별도 해석 확인 미입력"
+        ];
+      }
+
+      validateResult(result);
+      return result;
+    }
+
+    function ordinaryDesignSafe(v){
+      return Number.isFinite(v) ? v : 0;
+    }
+
+    function renderBeamDiagram(source){
+      const input = source?.input ? source.input : source;
+      const beamWidth = input?.b ?? null;
+      const beamDepth = input?.h ?? null;
+      const ad = input?.diagW ?? null;
+      const bd = input?.diagH ?? null;
+      const developmentUse = source?.diagonalDesign?.development?.ldUse ?? source?.beam44Design?.development?.ldUse ?? null;
+      const memberName = input?.memberName ? String(input.memberName).trim() : "";
+
+      const labelB = beamWidth ? `b = ${fmt0(beamWidth)} mm` : "b";
+      const labelH = beamDepth ? `h = ${fmt0(beamDepth)} mm` : "h";
+      const labelAd = ad ? `a_d = ${fmt0(ad)} mm` : "a_d";
+      const labelBd = bd ? `b_d = ${fmt0(bd)} mm` : "b_d";
+      const labelLd = developmentUse ? `l_d = ${fmt0(developmentUse)} mm` : "l_d";
+
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 500" style="width:100%;height:auto;display:block" aria-label="연결보 개념도">
+          <defs>
+            <pattern id="diagHatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#ccd2da" stroke-width="3" />
+            </pattern>
+            <marker id="arrowGreen" viewBox="0 0 10 10" refX="6.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#2f7d44"></path>
+            </marker>
+          </defs>
+
+          <rect x="0" y="0" width="760" height="500" fill="#fcfcfc"></rect>
+
+          <text x="60" y="28" fill="#1f2937" font-size="18" font-weight="700">측면 개념도</text>
+          ${memberName ? `<text x="380" y="28" fill="#374151" font-size="15" font-weight="700" text-anchor="middle">부재명: ${escapeHtml(memberName)}</text>` : ""}
+
+          <path d="M38,92 L74,70 L110,62 L134,68 L156,60 L180,66 L180,222 L152,228 L126,218 L96,226 L66,210 L74,168 L58,138 L64,108 Z" fill="url(#diagHatch)" stroke="#8a8f98" stroke-width="2"></path>
+          <rect x="180" y="108" width="400" height="98" fill="#f7f7f7" stroke="#8a8f98" stroke-width="2"></rect>
+          <path d="M580,66 L604,60 L628,68 L652,62 L686,72 L722,94 L716,114 L722,146 L708,174 L716,204 L686,224 L654,216 L626,224 L580,206 Z" fill="url(#diagHatch)" stroke="#8a8f98" stroke-width="2"></path>
+
+          <line x1="380" y1="74" x2="380" y2="232" stroke="#d99a9a" stroke-width="1.5" stroke-dasharray="6 6"></line>
+          <text x="367" y="61" fill="#2f7d44" font-size="15" font-weight="700">A</text>
+          <line x1="387" y1="55" x2="387" y2="80" stroke="#2f7d44" stroke-width="2"></line>
+          <line x1="387" y1="55" x2="371" y2="55" stroke="#2f7d44" stroke-width="2"></line>
+          <text x="367" y="248" fill="#2f7d44" font-size="15" font-weight="700">A</text>
+          <line x1="387" y1="223" x2="387" y2="248" stroke="#2f7d44" stroke-width="2"></line>
+          <line x1="387" y1="248" x2="371" y2="248" stroke="#2f7d44" stroke-width="2"></line>
+
+          <line x1="84" y1="102" x2="670" y2="198" stroke="#8f2d63" stroke-width="10" stroke-linecap="round"></line>
+          <line x1="86" y1="116" x2="676" y2="210" stroke="#efc2d3" stroke-width="4" stroke-linecap="round"></line>
+          <line x1="90" y1="190" x2="668" y2="94" stroke="#8f2d63" stroke-width="10" stroke-linecap="round"></line>
+          <line x1="92" y1="178" x2="674" y2="80" stroke="#efc2d3" stroke-width="4" stroke-linecap="round"></line>
+
+          <g stroke="#3a7a44" stroke-width="4">
+            <line x1="250" y1="96" x2="250" y2="218"></line>
+            <line x1="274" y1="96" x2="274" y2="218"></line>
+            <line x1="298" y1="96" x2="298" y2="218"></line>
+            <line x1="322" y1="96" x2="322" y2="218"></line>
+            <line x1="346" y1="96" x2="346" y2="218"></line>
+            <line x1="370" y1="96" x2="370" y2="218"></line>
+            <line x1="394" y1="96" x2="394" y2="218"></line>
+            <line x1="418" y1="96" x2="418" y2="218"></line>
+            <line x1="442" y1="96" x2="442" y2="218"></line>
+            <line x1="466" y1="96" x2="466" y2="218"></line>
+            <line x1="490" y1="96" x2="490" y2="218"></line>
+          </g>
+
+          <line x1="580" y1="206" x2="580" y2="242" stroke="#9aa4b2" stroke-width="1.3" stroke-dasharray="4 4"></line>
+          <line x1="688" y1="208" x2="688" y2="242" stroke="#9aa4b2" stroke-width="1.3" stroke-dasharray="4 4"></line>
+          <line x1="580" y1="236" x2="688" y2="236" stroke="#2f7d44" stroke-width="2.4" marker-start="url(#arrowGreen)" marker-end="url(#arrowGreen)"></line>
+          <rect x="578" y="246" width="148" height="38" rx="8" fill="#ffffff" stroke="#d5dbe3"></rect>
+          <text x="652" y="260" fill="#2f7d44" font-size="13" font-weight="700" text-anchor="middle">${escapeHtml(labelLd)}</text>
+          <text x="652" y="275" fill="#2f7d44" font-size="12" text-anchor="middle">보 단부면부터 정착부재 내부로 확보</text>
+
+          <line x1="50" y1="260" x2="88" y2="260" stroke="#8f2d63" stroke-width="8" stroke-linecap="round"></line>
+          <text x="96" y="264" fill="#8f2d63" font-size="13">대각 주근</text>
+          <line x1="190" y1="260" x2="228" y2="260" stroke="#3a7a44" stroke-width="4"></line>
+          <text x="236" y="264" fill="#2f7d44" font-size="13">구속철근</text>
+
+          <line x1="38" y1="296" x2="722" y2="296" stroke="#d0d5dd" stroke-width="1.5"></line>
+          <text x="380" y="322" fill="#1f2937" font-size="18" font-weight="700" text-anchor="middle">A-A 단면</text>
+
+          <g transform="translate(302,350)">
+            <path d="M22,16 L54,10 L86,18 L118,12 L146,22 L170,40 L166,60 L170,84 L158,108 L164,126 L138,144 L108,138 L78,146 L34,132 L18,112 L12,90 L16,64 L12,40 Z" fill="url(#diagHatch)" stroke="#8a8f98" stroke-width="2"></path>
+            <rect x="52" y="28" width="84" height="100" fill="none" stroke="#8f2d63" stroke-width="3"></rect>
+
+            <rect x="62" y="40" width="28" height="20" rx="4" fill="none" stroke="#8f2d63" stroke-width="3"></rect>
+            <circle cx="72" cy="50" r="3.6" fill="#8f2d63"></circle>
+            <circle cx="82" cy="50" r="3.6" fill="#8f2d63"></circle>
+
+            <rect x="98" y="86" width="28" height="20" rx="4" fill="none" stroke="#8f2d63" stroke-width="3"></rect>
+            <circle cx="108" cy="96" r="3.6" fill="#8f2d63"></circle>
+            <circle cx="118" cy="96" r="3.6" fill="#8f2d63"></circle>
+
+            <line x1="38" y1="8" x2="150" y2="8" stroke="#2f7d44" stroke-width="2"></line>
+            <line x1="38" y1="2" x2="38" y2="14" stroke="#2f7d44" stroke-width="2"></line>
+            <line x1="150" y1="2" x2="150" y2="14" stroke="#2f7d44" stroke-width="2"></line>
+            <rect x="51" y="-18" width="86" height="18" rx="7" fill="#ffffff" stroke="#d5dbe3"></rect>
+            <text x="94" y="-5" fill="#2f7d44" font-size="12" font-weight="700" text-anchor="middle">${escapeHtml(labelB)}</text>
+
+            <line x1="26" y1="24" x2="26" y2="132" stroke="#2f7d44" stroke-width="2"></line>
+            <line x1="20" y1="24" x2="32" y2="24" stroke="#2f7d44" stroke-width="2"></line>
+            <line x1="20" y1="132" x2="32" y2="132" stroke="#2f7d44" stroke-width="2"></line>
+            <rect x="-80" y="69" width="90" height="18" rx="7" fill="#ffffff" stroke="#d5dbe3"></rect>
+            <text x="-35" y="82" fill="#2f7d44" font-size="12" font-weight="700" text-anchor="middle">${escapeHtml(labelH)}</text>
+
+            <line x1="62" y1="32" x2="90" y2="32" stroke="#2f7d44" stroke-width="2"></line>
+            <line x1="62" y1="26" x2="62" y2="38" stroke="#2f7d44" stroke-width="2"></line>
+            <line x1="90" y1="26" x2="90" y2="38" stroke="#2f7d44" stroke-width="2"></line>
+            <rect x="36" y="12" width="84" height="16" rx="6" fill="#ffffff" stroke="#d5dbe3"></rect>
+            <text x="78" y="24" fill="#2f7d44" font-size="10.8" font-weight="700" text-anchor="middle">${escapeHtml(labelAd)}</text>
+
+            <line x1="132" y1="86" x2="132" y2="106" stroke="#2f7d44" stroke-width="2"></line>
+            <line x1="126" y1="86" x2="138" y2="86" stroke="#2f7d44" stroke-width="2"></line>
+            <line x1="126" y1="106" x2="138" y2="106" stroke="#2f7d44" stroke-width="2"></line>
+            <rect x="140" y="88" width="86" height="16" rx="6" fill="#ffffff" stroke="#d5dbe3"></rect>
+            <text x="183" y="100" fill="#2f7d44" font-size="10.8" font-weight="700" text-anchor="middle">${escapeHtml(labelBd)}</text>
+          </g>
+        </svg>
+      `;
+    }
+
+
+    function renderReport(result, errorText = null){
+      const input = result?.input ?? null;
+      const project = input?.project || "";
+      const calculBy = input?.calculBy || "";
+      const subject = input?.subject || "";
+      const memberName = input?.memberName || "";
+      const reportDate = input?.reportDate || dateString();
+
+      const conditionsRows = [
+        ["부재 크기", input ? `${fmt0(input.b)}×${fmt0(input.h)} mm (b=${fmt0(input.b)}, h=${fmt0(input.h)})` : null],
+        ["부재명", input ? (input.memberName || "미입력") : null],
+        ["순경간", input ? `lₙ=${fmt0(input.ln)} mm` : null],
+        ["사용 재료", input ? `fck=${fmtAuto(input.fck, 1)} MPa, fy=${fmtAuto(input.fy, 1)} MPa${input.fyh ? `, fyh=${fmtAuto(input.fyh, 1)} MPa` : ""}` : null],
+        ["단면력", input ? `Vᵤ=${fmt(input.Vu, 1)} kN, Mᵤ=${fmt(input.Mu, 1)} kN·m` : null],
+        ["대각선 철근", input ? (input.diagW !== null && input.diagH !== null ? `a_d=${fmt0(input.diagW)} mm, b_d=${fmt0(input.diagH)} mm, c=${fmt0(input.cover)} mm` : `a_d, b_d 미입력 / c=${fmt0(input.cover)} mm`) : null]
+      ];
+
+      let calcHtml = "";
+      let summaryHtml = `
+        <div class="summary-box">
+          <div class="summary-lead"><span class="placeholder">입력 후 계산하기</span></div>
+        </div>
+      `;
+
+      if (errorText){
+        calcHtml = `<div class="error-box"><strong>오류</strong><br>${escapeHtml(errorText)}</div>`;
+      } else if (result){
+        const codeStatus = result.codeStatusText;
+
+        const commonSections = `
+          <div class="calc-item">
+            <div class="calc-head">2.1 연결보 분기 기준 검토</div>
+            <div class="code-ref">KDS 14 20 80 (2021) 4.7.7</div>
+            <ol class="calc-list">
+              <li>세장비 검토: lₙ / h = ${fmt(input.ln, 1)} / ${fmt(input.h, 1)} = ${fmt(result.slenderness, 2)}</li>
+              <li>${result.beam44Trigger ? "KDS 14 20 80(2021) 4.7.7(1): lₙ/h ≥ 4 이므로 연결보는 4.4의 요구 사항을 만족하도록 설계" : "KDS 14 20 80(2021) 4.7.7: lₙ/h < 4 이므로 대각선 보강 연결보 분기로 검토"}</li>
+              ${result.beam44Trigger ? `<li>횡좌굴 안정성 해석 입력: ${input.lateralStable ? "확인함 → 4.4.1(2)(3)(4) 완화 가능 검토" : "미입력 → 4.4 요구사항 일반 적용"}</li>` : ""}
+              <li>참고 전단비교: Vₗᵢₘ = λ√fck / 3 × A<sub>cp</sub> = ${fmt(input.lambda, 2)} × √${fmt(input.fck, 1)} / 3 × (${fmt0(input.b)} × ${fmt0(input.h)}) × 10<sup>-3</sup> = ${fmt(result.vLimit, 1)} kN, ${escapeHtml(result.shearStatusText)}</li>
+              <li class="calc-line-strong">${escapeHtml(result.codeText)} (${escapeHtml(codeStatus)})</li>
+            </ol>
+          </div>
+
+          <div class="calc-item">
+            <div class="calc-head">2.2 최종 설계 채택 분기</div>
+            <div class="code-ref">코드 판정 + 사용자 선택</div>
+            <ol class="calc-list">
+              <li>코드상 기본 분기: ${result.codeRequiresDiagonal ? "대각선 보강 연결보" : "4.4 보 요구사항 연결보"}</li>
+              <li>사용자 수동 적용: ${result.userForcedDiagonal ? "예" : "아니오"}</li>
+              <li class="calc-line-strong">최종 설계 분기: ${result.finalBranch === "diagonal" ? "대각선 보강 연결보" : "4.4 보 요구사항 연결보"}${result.branchReason === "user_override" ? " (코드상 4.4 분기이나 사용자 선택 적용)" : ""}</li>
+            </ol>
+          </div>
+        `;
+
+        let branchSections = "";
+        if (result.finalBranch === "diagonal"){
+          const d = result.diagonalDesign;
+          branchSections = `
+            <div class="calc-item">
+              <div class="calc-head">2.3 대각선 철근의 요구량 및 전단강도</div>
+              <div class="code-ref">KDS 14 20 80 (2021)</div>
+              <ol class="calc-list">
+                <li>대각선 각도: tan α = (h - b<sub>d</sub> - 2c) / lₙ = (${fmt(input.h, 1)} - ${fmt(input.diagH, 1)} - 2×${fmt(input.cover, 1)}) / ${fmt(input.ln, 1)} = ${fmt(d.rise / input.ln, 4)} → α = ${fmt(d.alpha, 2)}°</li>
+                <li>요구 대각선 철근량(1조): A<sub>vd,req</sub> = Vᵤ / (2 φ f<sub>y</sub> sin α) = ${fmt(d.asDiagReq, 1)} mm²</li>
+                <li>선택 배근: 각 조 ${d.diagonalGroup.count}-${d.diagonalGroup.bar}, 총 ${d.diagonalGroup.count * 2}-${d.diagonalGroup.bar} → A<sub>vd,prov</sub> = ${fmt(d.diagonalGroup.area, 1)} mm² / 조</li>
+                <li>설계 전단강도: φV<sub>n</sub> = φ·2A<sub>vd</sub>f<sub>y</sub>sin α = ${fmt(d.phiVn, 1)} kN ${yesno(d.phiVn >= input.Vu)}</li>
+                <li>최대 전단강도: V<sub>n</sub> = ${fmt(d.vn, 1)} kN ≤ V<sub>n,max</sub> = 0.83 λ√fck A<sub>cp</sub> = ${fmt(d.vnMax, 1)} kN ${yesno(d.vn <= d.vnMax)}</li>
+              </ol>
+            </div>
+
+            <div class="calc-item">
+              <div class="calc-head">2.4 대각선 다발철근의 정착길이</div>
+              <div class="code-ref">KDS 14 20 52 (2024)</div>
+              <ol class="calc-list">
+                <li>기본 인장 정착길이: l<sub>d,basic</sub> = 0.6 d<sub>b</sub> f<sub>y</sub> / (λ√fck) × α × β = ${fmt(d.development.ldBasic, 1)} mm</li>
+                <li>요구 정착길이: l<sub>d,req</sub> = max(1.25 l<sub>d,basic</sub>, 8d<sub>b</sub>, 150) = ${fmt(d.development.ldReq, 1)} mm</li>
+                <li>설계 정착길이: l<sub>d,use</sub> = ${fmt0(d.development.ldUse)} mm ${yesno(d.development.ldUse >= d.development.ldReq)}</li>
+              </ol>
+            </div>
+
+            <div class="calc-item">
+              <div class="calc-head">2.5 대각선 구속철근 간격</div>
+              <div class="code-ref">KDS 14 20 80 (2021)<br>KDS 14 20 50 (2022)</div>
+              <ol class="calc-list">
+                <li>선택 후프근: ${d.confinement.bar}, A<sub>sh</sub> = 2 × ${fmt(barArea(d.confinement.bar), 1)} = ${fmt(d.confinement.ash, 1)} mm² / 방향</li>
+                <li>요구 간격: s<sub>calc</sub> = min[s₁, s₂] = min(${fmt(d.confinement.sCalc1, 1)}, ${fmt(d.confinement.sCalc2, 1)}) = ${fmt(d.confinement.sCalc, 1)} mm</li>
+                <li>최대 허용 간격: s<sub>max</sub> = min(6d<sub>b,diag</sub>, 150, b / 4) = ${fmt(d.confinement.sMax, 1)} mm</li>
+                <li>설계 간격: s<sub>use</sub> = ${fmt0(d.confinement.sUse)} mm ${yesno(d.confinement.sUse <= d.confinement.sLimit && d.confinement.sUse > 0)}</li>
+              </ol>
+            </div>
+
+            <div class="calc-item">
+              <div class="calc-head">2.6 보방향 철근 및 최소 철근비 검토</div>
+              <div class="code-ref">KDS 14 20 80 (2021)</div>
+              <ol class="calc-list">
+                <li>길이방향 최소 철근량: A<sub>req</sub> = 0.002 b h = ${fmt(d.longitudinalReqTotal, 1)} mm²</li>
+                <li>선택 길이방향 철근: 상·하부 각 ${d.longitudinal.countPerFace}-${d.longitudinal.bar} → A<sub>prov,total</sub> = ${fmt(d.longitudinal.totalArea, 1)} mm² ${yesno(d.longitudinal.totalArea >= d.longitudinalReqTotal)}</li>
+                <li>보방향(수직) 스터럽 간격: s<sub>req</sub> = A<sub>sh</sub> / (0.002 b) = ${fmt(d.beamDirection.sReq, 1)} mm</li>
+                <li>설계 스터럽: ${d.beamDirection.bar} @ ${fmt0(d.beamDirection.sUse)} mm ${yesno(d.beamDirection.sUse <= d.beamDirection.sLimit && d.beamDirection.sUse > 0)}</li>
+              </ol>
+            </div>
+          `;
+        } else {
+          const o = result.beam44Design;
+          branchSections = `
+            <div class="calc-item">
+              <div class="calc-head">2.3 4.4 보 요구사항 적용 연결보 휨 검토</div>
+              <div class="code-ref">KDS 14 20 80 (2021) 4.4<br>KDS 14 20 20 (2022)</div>
+              <ol class="calc-list">
+                <li>유효깊이: d = h - c - d<sub>st</sub> - d<sub>b</sub>/2 = ${fmt(o.ordinaryMain.d, 1)} mm</li>
+                <li>최소 철근량(한 면): A<sub>s,min</sub> = max(0.25 λ√fck / fy · b d, 1.4 b d / fy) = ${fmt(o.ordinaryMain.asMin, 1)} mm²</li>
+                <li>선택 주근: 상·하부 각 ${o.ordinaryMain.countPerFace}-${o.ordinaryMain.bar} → A<sub>s,prov</sub> = ${fmt(o.ordinaryMain.faceArea, 1)} mm² / 면</li>
+                <li>강도 계산: a = ${fmt(o.ordinaryMain.a, 1)} mm, ε<sub>t</sub> = ${fmt(o.ordinaryMain.et, 4)}, φ = ${fmt(o.ordinaryMain.phi, 3)}</li>
+                <li>설계 휨강도: φM<sub>n</sub> = ${fmt(o.ordinaryMain.phiMn, 1)} kN·m ≥ Mᵤ = ${fmt(input.Mu, 1)} kN·m ${yesno(o.ordinaryMain.phiMn >= input.Mu)}</li>
+              </ol>
+            </div>
+
+            <div class="calc-item">
+              <div class="calc-head">2.4 4.4 보 요구사항 적용 연결보 전단 검토</div>
+              <div class="code-ref">KDS 14 20 80 (2021) 4.4<br>KDS 14 20 22 (2022)</div>
+              <ol class="calc-list">
+                <li>콘크리트 전단강도: V<sub>c</sub> = 0.17 λ√fck b d = ${fmt(o.vc, 1)} kN</li>
+                <li>필요 전단철근 강도: V<sub>s,req</sub> = max(Vᵤ / φ - V<sub>c</sub>, 0) = ${fmt(o.vsReq, 1)} kN</li>
+                <li>선택 스터럽: ${o.stirrup.bar} 2-Leg (A<sub>v</sub> = ${fmt(o.stirrup.av, 1)} mm²)</li>
+                <li>요구 간격: s<sub>req</sub> = ${Number.isFinite(o.stirrup.sReq) ? `${fmt(o.stirrup.sReq, 1)} mm` : "전단보강 최소 상세로 제어"}</li>
+                <li>설계 간격: s<sub>use</sub> = ${fmt0(o.stirrup.sUse)} mm, s<sub>max</sub> = ${fmt(o.stirrup.sMax, 1)} mm ${yesno(o.stirrup.sUse <= o.stirrup.sLimit && o.stirrup.sUse > 0)}</li>
+              </ol>
+            </div>
+
+            <div class="calc-item">
+              <div class="calc-head">2.5 4.4 보 요구사항 적용 연결보 정착 및 상세 검토</div>
+              <div class="code-ref">KDS 14 20 80 (2021) 4.4<br>KDS 14 20 52 (2024)<br>KDS 14 20 50 (2022)</div>
+              <ol class="calc-list">
+                <li>기본 인장 정착길이: l<sub>d,basic</sub> = 0.6 d<sub>b</sub> f<sub>y</sub> / (λ√fck) × α × β = ${fmt(o.development.ldBasic, 1)} mm</li>
+                <li>요구 정착길이: l<sub>d,req</sub> = max(1.25 l<sub>d,basic</sub>, 8d<sub>b</sub>, 150) = ${fmt(o.development.ldReq, 1)} mm</li>
+                <li>설계 반영 길이: l<sub>d,use</sub> = ${fmt0(o.development.ldUse)} mm ${yesno(o.development.ldUse >= o.development.ldReq)}</li>
+              </ol>
+            </div>
+
+            <div class="calc-item">
+              <div class="calc-head">2.6 4.4 보 요구사항 적용 연결보 상세 검토</div>
+              <div class="code-ref">KDS 14 20 80 (2021) 4.4<br>KDS 14 20 20 (2022)<br>KDS 14 20 22 (2022)<br>KDS 14 20 50 (2022)</div>
+              <ol class="calc-list">
+                <li>제공 총 주근량: ${fmt(o.ordinaryMain.totalArea, 1)} mm² ≥ 최소 필요 총량 ${fmt(o.asMinTotal, 1)} mm² ${yesno(o.ordinaryMain.totalArea >= o.asMinTotal)}</li>
+                <li>제공 스터럽 간격: ${fmt0(o.stirrup.sUse)} mm ≤ 허용 간격 ${fmt(o.stirrup.sLimit, 1)} mm ${yesno(o.stirrup.sUse <= o.stirrup.sLimit && o.stirrup.sUse > 0)}</li>
+                <li>횡좌굴 안정성 해석 입력: ${input.lateralStable ? "확인함" : "미입력"}</li>
+                <li class="calc-line-strong">4.4 보 요구사항 연결보 상세 검토 완료</li>
+              </ol>
+            </div>
+          `;
+        }
+
+        calcHtml = commonSections + branchSections;
+
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-lead">${escapeHtml(result.summaryLead)}</div>
+            ${result.summaryDetail ? `<div class="summary-meta">${escapeHtml(result.summaryDetail)}</div>` : ""}
+            <ul>
+              ${result.summaryLines.map(line => `<li>${escapeHtml(line)}</li>`).join("")}
+            </ul>
+          </div>
+        `;
+      }
+
+      const html = `
+        <table class="meta-table">
+          <tr>
+            <td class="meta-head">PROJECT</td>
+            <td class="meta-value">${blank(project)}</td>
+            <td class="meta-head">CACUL. BY</td>
+            <td class="meta-value">${blank(calculBy)}</td>
+          </tr>
+          <tr>
+            <td class="meta-head">SUBJECT</td>
+            <td class="meta-value">${blank(subject)}</td>
+            <td class="meta-head">DATE</td>
+            <td class="meta-value">${blank(reportDate)}</td>
+          </tr>
+        </table>
+
+        <div class="report-title">특수전단벽 연결보 (Coupling Beam)</div>
+
+        <section class="section-block">
+          <div class="section-head">1. 설계 조건 (Design Conditions)</div>
+          <div class="conditions-layout">
+            <div class="conditions-list">
+              ${conditionsRows.map(([key, value]) => `
+                <div class="conditions-row">
+                  <div class="conditions-key">${escapeHtml(key)}</div>
+                  <div class="conditions-eq">=</div>
+                  <div class="conditions-value">${value ? escapeHtml(value) : '<span class="placeholder">—</span>'}</div>
+                </div>
+              `).join("")}
+            </div>
+            <div>
+              <div class="diagram-box">
+                ${renderBeamDiagram(result || { input })}
+              </div>
+              <div class="diagram-caption">상부는 연결보 측면 개념도, 하부는 A-A 단면입니다. 정착길이 l<sub>d</sub>는 보 단부면 기준으로 따로 분리 표기했고, A-A 단면의 b, h, a<sub>d</sub>, b<sub>d</sub>는 흰색 콜아웃 박스로 정리해 서로 겹치지 않게 배치했습니다.</div>
+            </div>
+          </div>
+          <div class="basis-note">
+            ${escapeHtml(BASIS_TEXT)}<br>
+            기본 가정: 비경량콘크리트가 아니면 λ 값을 고급 설정에서 입력하고, 정착계수 α·β는 상세조건에 맞게 직접 조정합니다. 본 도구의 기본 분기는 KDS 14 20 80(2021) 4.7.7에 따라 l<sub>n</sub>/h ≥ 4이면 4.4 보 요구사항, l<sub>n</sub>/h &lt; 4이면 대각선 보강 연결보로 처리합니다. 대각철근 다발 치수 a<sub>d</sub>, b<sub>d</sub>는 대각선 보강 분기이거나 수동 적용 옵션을 체크한 경우 입력합니다.
+          </div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">2. 기준 적합성 검토 및 계산서</div>
+          ${calcHtml}
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">3. 최종 배근 요약 (Conclusion)</div>
+          ${summaryHtml}
+        </section>
+      `;
+
+      document.getElementById("reportRoot").innerHTML = html;
+    }
+
+    function updateStatus(result, errorText = null){
+      const status = document.getElementById("statusCard");
+      if (errorText){
+        status.innerHTML = `<strong>기준 적용 상태:</strong> 오류 발생 — ${escapeHtml(errorText)}`;
+        return;
+      }
+      if (!result){
+        status.innerHTML = `<strong>기준 적용 상태:</strong> 입력 후 계산 대기`;
+        return;
+      }
+
+      const branchText = result.finalBranch === "diagonal" ? "대각선 보강 연결보" : "4.4 보 요구사항 연결보";
+      status.innerHTML = `
+        <strong>기준 적용 상태:</strong> ${escapeHtml(result.codeText)}<br>
+        <strong>최종 분기:</strong> ${escapeHtml(branchText)}${result.branchReason === "user_override" ? " (사용자 수동 적용)" : ""}<br>
+        <strong>기준 버전:</strong> ${escapeHtml(BASIS_TEXT)}
+      `;
+    }
+
+    function runCalculation(){
+      try{
+        const input = readInput();
+        const result = performDesign(input);
+        STATE.lastResult = result;
+        STATE.lastError = null;
+        renderReport(result, null);
+        updateStatus(result, null);
+      } catch(error){
+        STATE.lastResult = null;
+        STATE.lastError = error.message || "알 수 없는 오류";
+        renderReport(null, STATE.lastError);
+        updateStatus(null, STATE.lastError);
+      }
+    }
+
+    function exportPDF(){
+      window.print();
+    }
+
+    document.getElementById("calcBtn").addEventListener("click", runCalculation);
+    document.getElementById("pdfBtn").addEventListener("click", exportPDF);
+    document.getElementById("designForm").addEventListener("submit", function(event){
+      event.preventDefault();
+      runCalculation();
+    });
+
+    document.getElementById("reportDate").value = dateString();
+    renderReport(null, null);
+    updateStatus(null, null);
+  </script>
+</body>
+</html>
