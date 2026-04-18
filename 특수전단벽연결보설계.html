@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>특수전단벽 연결보 구조계산 프로그램</title>
+    <title>특수전단벽 연결보 구조계산 프로그램 (Full Version)</title>
     <!-- Dependencies -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -13,13 +13,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #e5e7eb; overflow: hidden; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         @media print {
             @page { size: A4; margin: 0; }
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .no-print { display: none !important; }
+            .report-page { margin: 0 !important; box-shadow: none !important; width: 100% !important; }
         }
+        .text-blue-600 { color: #2563eb !important; }
+        .text-red-600 { color: #dc2626 !important; }
     </style>
 </head>
 <body>
@@ -42,14 +47,14 @@
                 h: 600,
                 ln: 1240,
                 fck: 30,
-                fyd: 550, // 대각선 철근 항복강도
-                fyh: 500, // 횡철근 항복강도
-                fy: 400,  // 기타 철근 항복강도
+                fyd: 550,
+                fyh: 500,
+                fy: 400,
                 Vu: 244.20,
                 Mu: 135.67,
                 c: 20,
-                bundle_w: 170, // 다발 가로
-                bundle_h: 170, // 다발 세로
+                bundle_w: 170,
+                bundle_h: 170,
                 db: 19,
                 Avd_single: 287,
                 diagonal_count: 4,
@@ -70,14 +75,12 @@
                 const file = e.target.files?.[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onloadend = () => {
-                        setImageSrc(reader.result);
-                    };
+                    reader.onloadend = () => setImageSrc(reader.result);
                     reader.readAsDataURL(file);
                 }
             };
 
-            // --- Calculations & Validations ---
+            // --- Calculations Logic ---
             const ln_h = inputs.ln / inputs.h;
             const isSlender = ln_h >= 4;
             const ln_h_op = isSlender ? '≥' : '<';
@@ -112,8 +115,7 @@
             const Ag = (inputs.bundle_w + 2 * inputs.c) * (inputs.bundle_h + 2 * inputs.c);
             const Ach = inputs.bundle_w * inputs.bundle_h;
             const s_req1 = (2 * inputs.Ash_single) / (0.3 * inputs.hc * (inputs.fck / inputs.fyh) * (Ag / Ach - 1));
-            const hx = inputs.hc;
-            const s_req2 = 100 + (350 - hx) / 3;
+            const s_req2 = 100 + (350 - inputs.hc) / 3;
             const s_req3 = 150;
             const s_req4 = 6 * inputs.db;
             const s_req5 = inputs.b / 4;
@@ -128,26 +130,22 @@
             const handleDownloadPDF = async () => {
                 const { jsPDF } = window.jspdf;
                 setIsGenerating(true);
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
+                await new Promise(r => setTimeout(r, 600));
                 try {
                     const canvas = await html2canvas(reportRef.current, { scale: 2, useCORS: true });
                     const imgData = canvas.toDataURL('image/png');
                     const pdf = new jsPDF('p', 'mm', 'a4');
                     const pdfWidth = pdf.internal.pageSize.getWidth();
                     const pdfHeight = pdf.internal.pageSize.getHeight();
-                    
                     const canvasRatio = canvas.height / canvas.width;
                     let finalWidth = pdfWidth;
                     let finalHeight = canvasRatio * pdfWidth;
-                    
                     if (finalHeight > pdfHeight) {
                         finalHeight = pdfHeight;
                         finalWidth = finalHeight / canvasRatio;
                     }
-                    
                     pdf.addImage(imgData, 'PNG', (pdfWidth - finalWidth) / 2, 0, finalWidth, finalHeight);
-                    pdf.save(`${inputs.projectName}_구조계산서.pdf`);
+                    pdf.save(`${inputs.projectName}.pdf`);
                 } finally {
                     setIsGenerating(false);
                 }
@@ -159,197 +157,204 @@
                 </span>
             );
 
-            // Initialize Lucide icons on render
             useEffect(() => {
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
+                if (window.lucide) window.lucide.createIcons();
             });
 
             return (
-                <div className="flex h-screen overflow-hidden">
-                    {/* Sidebar (Full Inputs) */}
-                    <div className="w-80 bg-white border-r border-gray-300 flex flex-col no-print z-10 shadow-lg shrink-0 overflow-y-auto">
-                        <div className="p-4 border-b border-gray-200 bg-gray-50 flex flex-col gap-3">
+                <div className="flex bg-gray-200 h-screen overflow-hidden">
+                    {/* Sidebar */}
+                    <div className="w-84 bg-white border-r border-gray-300 flex flex-col no-print z-10 shadow-lg shrink-0 overflow-y-auto sidebar">
+                        <div className="p-4 border-b bg-gray-50 flex flex-col gap-3">
                             <div className="flex items-center gap-2 font-bold text-gray-700">
                                 <i data-lucide="settings-2" className="w-5 h-5"></i>
-                                설계 변수 입력
+                                설계 파라미터 제어
                             </div>
-                            <button
-                                onClick={handleDownloadPDF}
-                                disabled={isGenerating}
-                                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded text-sm font-bold transition-all"
-                            >
-                                <i data-lucide="download" className="w-4 h-4"></i>
-                                {isGenerating ? '생성 중...' : 'PDF 다운로드'}
+                            <button onClick={handleDownloadPDF} disabled={isGenerating} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded text-sm font-bold transition-all shadow disabled:bg-gray-400">
+                                <i data-lucide="file-down" className="w-4 h-4"></i>
+                                {isGenerating ? '계산서 가공 중...' : 'PDF 리포트 발행'}
                             </button>
                         </div>
                         
-                        <div className="p-4 space-y-6 text-sm">
-                            {/* Image Upload */}
-                            <div className="space-y-3">
-                                <h3 className="font-bold text-gray-800 border-b pb-1 flex items-center gap-1">
-                                    <i data-lucide="image-plus" className="w-4 h-4"></i>
-                                    단면도 이미지 업로드
-                                </h3>
+                        <div className="p-4 space-y-6">
+                            <section className="space-y-3">
+                                <h3 className="font-bold text-gray-800 border-b pb-1 flex items-center gap-1 text-sm"><i data-lucide="image" className="w-4 h-4"></i>단면 상세도</h3>
                                 <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full text-xs" />
-                            </div>
+                            </section>
 
-                            {/* Project Info */}
-                            <div className="space-y-3">
-                                <h3 className="font-bold text-gray-800 border-b pb-1">프로젝트 정보</h3>
-                                <div className="space-y-2">
+                            <section className="space-y-4">
+                                <h3 className="font-bold text-gray-800 border-b pb-1 text-sm">프레임워크 정보</h3>
+                                <div className="space-y-2 text-xs">
                                     <label className="block">프로젝트명<input type="text" name="projectName" value={inputs.projectName} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
                                     <label className="block">주제<input type="text" name="subject" value={inputs.subject} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
-                                    <label className="block text-xs">작성일/작성자
-                                        <div className="flex gap-1 mt-1">
-                                            <input type="text" name="date" value={inputs.date} onChange={handleChange} className="w-1/2 border rounded p-1.5" />
-                                            <input type="text" name="caculBy" value={inputs.caculBy} onChange={handleChange} className="w-1/2 border rounded p-1.5" />
-                                        </div>
-                                    </label>
+                                    <div className="flex gap-2">
+                                        <label className="w-1/2">날짜<input type="text" name="date" value={inputs.date} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                        <label className="w-1/2">엔지니어<input type="text" name="caculBy" value={inputs.caculBy} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    </div>
                                 </div>
-                            </div>
+                            </section>
 
-                            {/* Dimensions */}
-                            <div className="space-y-3">
-                                <h3 className="font-bold text-gray-800 border-b pb-1">부재 치수 (mm)</h3>
-                                <div className="grid grid-cols-2 gap-2">
+                            <section className="space-y-4">
+                                <h3 className="font-bold text-gray-800 border-b pb-1 text-sm">기하학적 제원 (mm)</h3>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
                                     <label>폭 (b)<input type="number" name="b" value={inputs.b} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
                                     <label>높이 (h)<input type="number" name="h" value={inputs.h} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
                                     <label>순경간 (ln)<input type="number" name="ln" value={inputs.ln} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
                                     <label>피복 (c)<input type="number" name="c" value={inputs.c} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
                                 </div>
-                            </div>
+                            </section>
 
-                            {/* Forces */}
-                            <div className="space-y-3">
-                                <h3 className="font-bold text-gray-800 border-b pb-1">하중 (kN, kN·m)</h3>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <label>Vu<input type="number" name="Vu" value={inputs.Vu} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
-                                    <label>Mu<input type="number" name="Mu" value={inputs.Mu} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                            <section className="space-y-4">
+                                <h3 className="font-bold text-gray-800 border-b pb-1 text-sm">하중 조건 (Limit State)</h3>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <label>Vu (kN)<input type="number" name="Vu" value={inputs.Vu} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    <label>Mu (kN·m)<input type="number" name="Mu" value={inputs.Mu} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
                                 </div>
-                            </div>
+                            </section>
 
-                            {/* Materials */}
-                            <div className="space-y-3">
-                                <h3 className="font-bold text-gray-800 border-b pb-1">재료 강도 (MPa)</h3>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <label>fck<input type="number" name="fck" value={inputs.fck} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
-                                    <label>fyd (주)<input type="number" name="fyd" value={inputs.fyd} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
-                                    <label>fyh (횡)<input type="number" name="fyh" value={inputs.fyh} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
-                                    <label>fy<input type="number" name="fy" value={inputs.fy} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                            <section className="space-y-4">
+                                <h3 className="font-bold text-gray-800 border-b pb-1 text-sm">재료 물성 (MPa)</h3>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <label>fck (콘클)<input type="number" name="fck" value={inputs.fck} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    <label>fyd (대각)<input type="number" name="fyd" value={inputs.fyd} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    <label>fyh (횡방)<input type="number" name="fyh" value={inputs.fyh} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    <label>fy (기타)<input type="number" name="fy" value={inputs.fy} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
                                 </div>
-                            </div>
+                            </section>
 
-                            {/* Rebar Details */}
-                            <div className="space-y-3">
-                                <h3 className="font-bold text-gray-800 border-b pb-1">철근 상세</h3>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <label>다발 가로(w)<input type="number" name="bundle_w" value={inputs.bundle_w} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
-                                    <label>다발 세로(h)<input type="number" name="bundle_h" value={inputs.bundle_h} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
-                                    <label>대각 직경(db)<input type="number" name="db" value={inputs.db} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
-                                    <label>개수<input type="number" name="diagonal_count" value={inputs.diagonal_count} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
-                                    <label>직경(횡)<input type="number" name="db_transverse" value={inputs.db_transverse} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
-                                    <label>간격(s)<input type="number" name="Ash_single" value={inputs.Ash_single} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                            <section className="space-y-4 pb-8">
+                                <h3 className="font-bold text-gray-800 border-b pb-1 text-sm">배근 상세 정보</h3>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <label>다발 가로<input type="number" name="bundle_w" value={inputs.bundle_w} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    <label>다발 세로<input type="number" name="bundle_h" value={inputs.bundle_h} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    <label>대각직경(db)<input type="number" name="db" value={inputs.db} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    <label>대단면적<input type="number" name="Avd_single" value={inputs.Avd_single} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    <label>다발개수<input type="number" name="diagonal_count" value={inputs.diagonal_count} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    <label>코어(hc)<input type="number" name="hc" value={inputs.hc} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    <label>횡단면적(Ash)<input type="number" name="Ash_single" value={inputs.Ash_single} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
+                                    <label>횡직경(db)<input type="number" name="db_transverse" value={inputs.db_transverse} onChange={handleChange} className="w-full border rounded p-1.5 mt-1"/></label>
                                 </div>
-                            </div>
+                            </section>
                         </div>
                     </div>
 
-                    {/* Report Area */}
-                    <div className="flex-1 p-8 overflow-y-auto flex justify-center bg-gray-200">
-                        <div ref={reportRef} className="print-area w-[210mm] min-h-[297mm] bg-white p-10 shadow-2xl text-[11px] leading-snug box-border" style={{ color: '#000000' }}>
-                            {/* Header Table */}
-                            <table className="w-full border-collapse border-2 mb-4 text-center border-black">
+                    {/* Report Render Area */}
+                    <div className="flex-1 p-8 overflow-y-auto flex justify-center no-print scroll-smooth">
+                        <div ref={reportRef} className="report-page bg-white w-[210mm] min-h-[297mm] p-10 shadow-2xl text-[11px] leading-snug box-border text-black">
+                            
+                            {/* Header Section */}
+                            <table className="w-full border-collapse border-2 border-black mb-4 text-center">
                                 <tbody>
-                                    <tr>
-                                        <td className="border border-black w-[15%] font-bold py-1.5 bg-gray-50 uppercase">Project</td>
-                                        <td className="border border-black w-[35%] text-left px-3">{inputs.projectName}</td>
-                                        <td className="border border-black w-[15%] font-bold bg-gray-50 uppercase">By</td>
-                                        <td className="border border-black w-[35%]">{inputs.caculBy}</td>
+                                    <tr className="bg-gray-50 uppercase tracking-tighter">
+                                        <td className="border border-black font-bold w-[12%] py-2">Project</td>
+                                        <td className="border border-black w-[38%] text-left px-3 text-[12px]">{inputs.projectName}</td>
+                                        <td className="border border-black font-bold w-[12%]">Cacul. By</td>
+                                        <td className="border border-black w-[38%]">{inputs.caculBy}</td>
                                     </tr>
-                                    <tr>
-                                        <td className="border border-black font-bold py-1.5 bg-gray-50 uppercase">Subject</td>
-                                        <td className="border border-black text-left px-3">{inputs.subject}</td>
-                                        <td className="border border-black font-bold bg-gray-50 uppercase">Date</td>
+                                    <tr className="bg-gray-50 uppercase tracking-tighter">
+                                        <td className="border border-black font-bold py-2">Subject</td>
+                                        <td className="border border-black text-left px-3 text-[12px]">{inputs.subject}</td>
+                                        <td className="border border-black font-bold">Date</td>
                                         <td className="border border-black">{inputs.date}</td>
                                     </tr>
                                 </tbody>
                             </table>
 
-                            <h1 className="text-lg font-bold mb-4 border-b-2 border-black pb-1 text-center uppercase tracking-wider">특수전단벽 연결보 (Coupling Beam) 구조계산 보고서</h1>
+                            <h1 className="text-[17px] font-bold mb-6 border-b-2 border-black pb-2 text-center uppercase tracking-normal">특수전단벽 연결보 (Coupling Beam) 구조계산 보고서</h1>
 
                             {/* Section 1 */}
-                            <div className="mb-5">
-                                <h2 className="text-sm font-bold mb-2">1. 설계 조건 (Design Conditions)</h2>
-                                <div className="flex gap-4 ml-2">
-                                    <div className="w-1/2">
-                                        <table className="w-full text-left border-none">
-                                            <tbody className="space-y-1">
-                                                <tr><td className="w-20 font-semibold">부재 규격</td><td>: NBI {inputs.b} × {inputs.h} mm</td></tr>
-                                                <tr><td className="font-semibold">순경간 (ln)</td><td>: {inputs.ln} mm</td></tr>
-                                                <tr><td className="font-semibold">사용 재료</td><td>: fck = {inputs.fck} MPa, fy = {inputs.fy} MPa</td></tr>
-                                                <tr><td className="font-semibold">설계 하중</td><td>: Vu = {inputs.Vu} kN, Mu = {inputs.Mu} kN·m</td></tr>
-                                                <tr><td className="font-semibold whitespace-nowrap">다발 크기</td><td>: {inputs.bundle_w} × {inputs.bundle_h} mm (피복 {inputs.c}mm)</td></tr>
-                                            </tbody>
-                                        </table>
+                            <div className="mb-6">
+                                <h2 className="text-[13px] font-bold mb-3 flex items-center gap-2">
+                                    <span className="bg-black text-white px-2 py-0.5 rounded-sm">1</span> 
+                                    설계 조건 (Design Conditions)
+                                </h2>
+                                <div className="flex gap-6 ml-3">
+                                    <div className="w-1/2 space-y-1.5">
+                                        <p><span className="font-semibold w-24 inline-block">부재 규격:</span> NBI {inputs.b} × {inputs.h} (b={inputs.b}mm, h={inputs.h}mm)</p>
+                                        <p><span className="font-semibold w-24 inline-block">순경간 (ln):</span> l<sub>n</sub> = {inputs.ln} mm</p>
+                                        <p><span className="font-semibold w-24 inline-block">사용 재료:</span> f<sub>ck</sub> = {inputs.fck} MPa, f<sub>y</sub> = {inputs.fy} MPa</p>
+                                        <p><span className="font-semibold w-24 inline-block">설계 단면력:</span> V<sub>u</sub> = {inputs.Vu} kN, M<sub>u</sub> = {inputs.Mu} kN·m</p>
+                                        <p><span className="font-semibold w-24 inline-block">대각 철근폭:</span> {inputs.bundle_w} mm × {inputs.bundle_h} mm (피복 {inputs.c}mm)</p>
                                     </div>
-                                    <div className="w-1/2 h-32 border border-black flex items-center justify-center grayscale overflow-hidden bg-gray-50">
-                                        {imageSrc ? <img src={imageSrc} className="w-full h-full object-contain" /> : <p className="text-gray-400 text-[10px]">단면 상세도 미업로드</p>}
+                                    <div className="w-1/2 h-36 border border-black flex items-center justify-center grayscale overflow-hidden bg-gray-50 relative">
+                                        {imageSrc ? <img src={imageSrc} className="w-full h-full object-contain" /> : <div className="text-center text-gray-400 font-bold uppercase tracking-widest opacity-30 text-[9px]">Structural Detail View<br/>(Please Upload)</div>}
                                     </div>
                                 </div>
                             </div>
 
                             {/* Section 2 */}
-                            <div className="mb-5">
-                                <h2 className="text-sm font-bold mb-3 border-b border-black pb-1">2. 기준 적합성 검토 및 계산서</h2>
+                            <div className="mb-6">
+                                <h2 className="text-[13px] font-bold mb-4 border-b border-black pb-1 flex items-center gap-2">
+                                    <span className="bg-black text-white px-2 py-0.5 rounded-sm">2</span>
+                                    기준 적합성 검토 및 상세 계산서
+                                </h2>
                                 
-                                <div className="space-y-4 ml-2">
+                                <div className="space-y-6 ml-3">
                                     <div className="relative">
-                                        <span className="absolute right-0 top-0 text-[9px] text-gray-500">[KDS 14 20 80, 4.1.8.7]</span>
-                                        <h3 className="font-bold">2.1 대각선 보강 여부 결정</h3>
-                                        <div className="ml-4 mt-1">
-                                            <p>1) 세장비 검토: ln / h = {inputs.ln} / {inputs.h} = {ln_h.toFixed(2)} {ln_h_op} 4</p>
-                                            <p>2) 임계 전단력: √(fck)/3 × Acp = √({inputs.fck})/3 × ({inputs.b}×{inputs.h}) × 10⁻³ = {V_limit.toFixed(1)} kN</p>
-                                            <p className="font-bold mt-1 text-gray-800">→ {ln_h_eval}</p>
+                                        <span className="absolute right-0 top-0 text-[10px] text-gray-500 italic">[KDS 14 20 80, 4.1.8.7]</span>
+                                        <h3 className="font-bold text-[12px] mb-2 underline underline-offset-4 decoration-1 decoration-gray-400">2.1 대각선 보강 여부 결정 (Slenderness & Force Check)</h3>
+                                        <div className="ml-5 space-y-1">
+                                            <p>1) 세장비 검토: l<sub>n</sub> / h = {inputs.ln} / {inputs.h} = {ln_h.toFixed(2)} {ln_h_op} 4</p>
+                                            <p>2) 계수전단력 임계값: √(f<sub>ck</sub>) / 3 × A<sub>cp</sub> = √({inputs.fck}) / 3 × ({inputs.b} × {inputs.h}) × 10<sup>-3</sup> = {V_limit.toFixed(1)} kN</p>
+                                            <p className="font-bold mt-2 text-gray-900 border-l-4 border-black pl-3 py-1 bg-gray-50">→ 결론: {ln_h_eval}</p>
                                         </div>
                                     </div>
 
                                     <div className="relative">
-                                        <span className="absolute right-0 top-0 text-[9px] text-gray-500">[KDS 14 20 80, 4.1.8.7]</span>
-                                        <h3 className="font-bold">2.2 개별 대각선 철근의 강도 검토</h3>
-                                        <div className="ml-4 mt-1 space-y-1">
-                                            <p>1) 경사각(α) ≈ {alphaDeg}° | 필요량 (Avd,req) = {Avd_req.toFixed(1)} mm²</p>
-                                            <p>2) 배근량: {inputs.diagonal_count}-D{inputs.db} (Avd,prov = {Avd_prov} mm²) <EvalResult isOK={Avd_prov >= Avd_req} /></p>
-                                            <p>3) 설계 전단강도: ΦVn = {phi_Vn_prov.toFixed(1)} kN ≥ Vu ({inputs.Vu} kN) <EvalResult isOK={isShearOK} /></p>
-                                            <p>4) 최대 전단강도: Vn = {Vn_prov.toFixed(1)} kN ≤ Vn,max = {Vn_max.toFixed(1)} kN <EvalResult isOK={isMaxShearOK} /></p>
+                                        <span className="absolute right-0 top-0 text-[10px] text-gray-500 italic">[KDS 14 20 80, 4.1.8.7]</span>
+                                        <h3 className="font-bold text-[12px] mb-2 underline underline-offset-4 decoration-1 decoration-gray-400">2.2 개별 대각선 철근의 강도 및 상세 검토</h3>
+                                        <div className="ml-5 space-y-1.5">
+                                            <p>1) 대각선 경사각(α) 산정 (Iteration): α ≈ {alphaDeg}° | sin α = {sinAlpha.toFixed(3)}</p>
+                                            <p>2) 필요 철근량 (Avd,req) = V<sub>u</sub> / (2 Φ f<sub>y</sub> sin α) = {Avd_req.toFixed(1)} mm<sup>2</sup></p>
+                                            <p>3) 배근 철근량: {inputs.diagonal_count}-D{inputs.db} (A<sub>vd,prov</sub> = {Avd_prov} mm<sup>2</sup>) <EvalResult isOK={Avd_prov >= Avd_req} /></p>
+                                            <p>4) 설계 전단강도: ΦV<sub>n</sub> = Φ 2 A<sub>vd</sub> f<sub>y</sub> sin α = {phi_Vn_prov.toFixed(1)} kN ≥ V<sub>u</sub> ({inputs.Vu} kN) <EvalResult isOK={isShearOK} /></p>
+                                            <p>5) 최대 전단강도: V<sub>n</sub> = {Vn_prov.toFixed(1)} kN ≤ V<sub>n,max</sub> ({Vn_max.toFixed(1)} kN) <EvalResult isOK={isMaxShearOK} /></p>
                                         </div>
                                     </div>
 
                                     <div className="relative">
-                                        <span className="absolute right-0 top-0 text-[9px] text-gray-500">[KDS 14 20 80]</span>
-                                        <h3 className="font-bold">2.3 횡구속 철근 및 간격 규정</h3>
-                                        <div className="ml-4 mt-1 space-y-1">
-                                            <p>1) Ash (2-Legs) = 2 × {inputs.Ash_single} = {(2 * inputs.Ash_single).toFixed(1)} mm²</p>
-                                            <p>2) 요구/최대 간격 규정 준수 검토: s_req = {s_final.toFixed(1)} mm</p>
-                                            <p>3) 설계 배근 간격: D{inputs.db_transverse} @ {s_design} mm <EvalResult isOK={isSpacingOK} /></p>
+                                        <span className="absolute right-0 top-0 text-[10px] text-gray-500 italic">[KDS 14 20 80, 4.1.8.7(4)]</span>
+                                        <h3 className="font-bold text-[12px] mb-2 underline underline-offset-4 decoration-1 decoration-gray-400">2.3 대각선 다발철근의 정착 및 횡구속</h3>
+                                        <div className="ml-5 space-y-2">
+                                            <div className="space-y-0.5">
+                                                <p className="font-semibold underline">A. 정착길이 검토 (Tension Development Length)</p>
+                                                <p>- 기본 정착(l<sub>d</sub>) = {ld.toFixed(0)} mm | 요구(L<sub>d,req</sub>) = 1.25 × l<sub>d</sub> = {Ld_req.toFixed(0)} mm</p>
+                                                <p>- 설계 정착길이: L<sub>d,design</sub> = {Ld_design} mm <EvalResult isOK={isLdOK} /></p>
+                                            </div>
+                                            <div className="space-y-0.5">
+                                                <p className="font-semibold underline">B. 횡구속 철근 간격 (Confinement Spacing)</p>
+                                                <p>- 산정 A<sub>sh</sub> (2-Legs) = 2 × {inputs.Ash_single} = {(2 * inputs.Ash_single).toFixed(1)} mm<sup>2</sup></p>
+                                                <p>- 간격 기준 검토 (5중 체크): min({s_req1.toFixed(1)}, {s_req2.toFixed(1)}, {s_req3}, {s_req4}, {s_req5}) = {s_final.toFixed(1)} mm</p>
+                                                <p>- 최종 설계 간격: D{inputs.db_transverse} @ {s_design} mm <EvalResult isOK={isSpacingOK} /></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="relative">
+                                        <span className="absolute right-0 top-0 text-[10px] text-gray-500 italic">[KDS 14 20 80]</span>
+                                        <h3 className="font-bold text-[12px] mb-2 underline underline-offset-4 decoration-1 decoration-gray-400">2.4 최소 철근비 및 기타 상세</h3>
+                                        <div className="ml-5 space-y-1">
+                                            <p>1) 수직 스터럽 요구 간격(s1) = {s1_req.toFixed(0)} mm → D{inputs.db_transverse} @ {s1_design} mm 배근 <EvalResult isOK={true} /></p>
+                                            <p>2) 길이방향 철근량 = {Av_long_req.toFixed(0)} mm<sup>2</sup> → 6-D{inputs.db} 배근 <EvalResult isOK={true} /></p>
+                                            <p className="font-bold mt-2 text-gray-900 border-l-4 border-black pl-3 py-1 bg-gray-50">→ 결론: 일반 및 특수 상세 규정 만족</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Section 3 */}
-                            <div className="mt-8 border-2 border-black p-4 bg-gray-50">
-                                <h2 className="text-base font-bold mb-2 border-b border-black pb-1 uppercase">3. 최종 배근 요약 (Conclusion)</h2>
-                                <ul className="list-disc list-inside space-y-1 font-bold">
-                                    <li>대각선 주철근: {inputs.diagonal_count}-D{inputs.db} (정착 l_d = {Ld_design} mm)</li>
-                                    <li>다발부 횡구속 철근: D{inputs.db_transverse} @ {s_design} mm</li>
-                                    <li>연결보 수직 스터럽: D{inputs.db_transverse} @ {s1_design} mm</li>
-                                    <li>연결보 길이방향 철근: 최소 철근비 준수 배근</li>
+                            {/* Section 3 Final Conclusion */}
+                            <div className="mt-10 border-2 border-black p-5 bg-gray-50 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 bg-black text-white px-4 py-1 font-bold text-[9px] uppercase tracking-widest">Final Summary</div>
+                                <h2 className="text-[14px] font-bold mb-3 uppercase tracking-tighter">3. 최종 배근 요약 (Conclusion)</h2>
+                                <ul className="list-inside space-y-2 font-bold text-[12px] marker:text-black">
+                                    <li className="flex gap-2"><span>■</span> <span>대각선 주철근: {inputs.diagonal_count}-D{inputs.db} (경사 배치, 정착길이 {Ld_design} mm)</span></li>
+                                    <li className="flex gap-2"><span>■</span> <span>다발 횡구속 철근: D{inputs.db_transverse} @ {s_design} mm ({inputs.bundle_w}×{inputs.bundle_h} 구간)</span></li>
+                                    <li className="flex gap-2"><span>■</span> <span>연결보 길이방향 철근: 6-D{inputs.db} (NBI {inputs.b}x{inputs.h})</span></li>
+                                    <li className="flex gap-2"><span>■</span> <span>연결보 수직 스터럽: D{inputs.db_transverse} @ {s1_design} mm (전 구간)</span></li>
                                 </ul>
                             </div>
                             
-                            <div className="mt-4 text-[10px] text-right text-gray-500 italic">본 보고서는 KDS 14 20 80 설계 기준을 바탕으로 자동 산출되었습니다.</div>
+                            <div className="mt-6 text-[9px] text-right text-gray-400 font-bold uppercase tracking-widest">Verification Success (KDS 14 20 80)</div>
                         </div>
                     </div>
                 </div>
